@@ -32,7 +32,6 @@ class DateHelper {
     }()
     
     func formatDate(_ dateString: String) -> String {
-        print("DATESTRING: \(dateString)")
         guard let date = serverFormatter.date(from: dateString) else {
             return ""
         }
@@ -49,19 +48,13 @@ class DateHelper {
     }
     func formatDateMessage(_ dateString: String) -> String {
         guard !dateString.isEmpty else { return "" }
-        
-        // 1. Очищаем строку от лишних пробелов по краям
         let trimmedDate = dateString.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // 2. Хак для старых iOS: превращаем "+00:00" в "+0000"
-        // Это гарантирует, что маска "Z" или "ZZZ" сработает везде.
         var finalDateString = trimmedDate
         if trimmedDate.contains("+") || trimmedDate.contains("-") {
             let components = trimmedDate.components(separatedBy: ":")
             if components.count > 1 {
                 let lastComponent = components.last!
                 if lastComponent.count == 2 {
-                    // Убираем только последнее двоеточие (которое в таймзоне)
                     if let lastIndex = finalDateString.lastIndex(of: ":") {
                         finalDateString.remove(at: lastIndex)
                     }
@@ -69,7 +62,6 @@ class DateHelper {
             }
         }
 
-        // 3. Форматтер для строки вида "yyyy-MM-dd HH:mm:ss+0000"
         let df = DateFormatter()
         df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "yyyy-MM-dd HH:mm:ssZ"
@@ -78,12 +70,10 @@ class DateHelper {
             return timeFormatter.string(from: date)
         }
         
-        // 4. Если всё равно не вышло (на случай, если Python пришлет "T")
         let isoDf = DateFormatter()
         isoDf.locale = Locale(identifier: "en_US_POSIX")
         isoDf.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         
-        // Пробуем еще раз с очищенной строкой
         let isoString = finalDateString.replacingOccurrences(of: " ", with: "T")
         if let date = isoDf.date(from: isoString) {
             return timeFormatter.string(from: date)

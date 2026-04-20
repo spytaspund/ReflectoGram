@@ -18,7 +18,6 @@ class CacheHelper {
     
     private var avatarsPath: String { (documentsPath as NSString).appendingPathComponent("avatars") }
     private var messagesPath: String { (documentsPath as NSString).appendingPathComponent("messages") }
-    // Новые папки для медиа
     private var thumbPath: String { (documentsPath as NSString).appendingPathComponent("media/thumb") }
     private var fullPath: String { (documentsPath as NSString).appendingPathComponent("media/full") }
     
@@ -33,13 +32,12 @@ class CacheHelper {
                 do {
                     try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
                 } catch {
-                    print("CACHE ERROR: Не удалось создать папку \(path)")
+                    print("CACHE ERROR: Can't create folder at \(path)")
                 }
             }
         }
     }
 
-    // Универсальный метод получения пути
     private func getPath(for category: CacheCategory, id: String) -> String {
         let folder: String
         switch category {
@@ -70,7 +68,6 @@ class CacheHelper {
         return nil
     }
 
-    // Сохранение сообщений и чатов (оставил логику прежней, но причесал)
     func saveMessages(_ messages: [Message], forChatID chatID: String) {
         let path = getPath(for: .messages, id: chatID)
         saveObject(messages, toPath: path)

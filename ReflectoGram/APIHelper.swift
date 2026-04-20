@@ -248,7 +248,6 @@ class APIHelper {
         
         NSURLConnection.sendAsynchronousRequest(URLRequest(url: url), queue: .main) { [weak self] _, data, _ in
             if let imageData = data, let image = UIImage(data: imageData) {
-                // Сохраняем в правильную папку
                 CacheHelper.shared.saveImage(image: image, id: cacheKey, category: category)
                 self?.imageCache.setObject(image, forKey: nsKey)
                 completion(image)

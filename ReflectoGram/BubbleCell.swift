@@ -295,7 +295,7 @@ class AudioMessageCell: BubbleCell {
         let captionW = LayoutHelper.sizeForText(captionLabel.text ?? "", font: captionLabel.font, maxWidth: maxBubbleWidth - 20).width
         
         let maxContentW = max(titleW, performerW)
-        let calcWidthForAudio = infoX + maxContentW + rightPadding + 5 // +5 для страховки
+        let calcWidthForAudio = infoX + maxContentW + rightPadding + 5
         
         let calcWidth = max(max(calcWidthForAudio, captionW + 20), 180)
         
@@ -373,18 +373,17 @@ class FileMessageCell: BubbleCell {
         let screenWidth = contentView.frame.width
         let maxBubbleWidth = screenWidth * 0.75
         
-        let infoX: CGFloat = 8 + 45 + 10 // Отступ + иконка + отступ
+        let infoX: CGFloat = 8 + 45 + 10
         let maxAvailableTextWidth = maxBubbleWidth - infoX - 10
         
-        // Считаем ширину имени файла и меты
         let fileW = LayoutHelper.sizeForText(fileNameLabel.text ?? "", font: fileNameLabel.font, maxWidth: maxAvailableTextWidth).width
         let metaW = LayoutHelper.sizeForText(fileMetaLabel.text ?? "", font: fileMetaLabel.font, maxWidth: maxAvailableTextWidth).width
         let captionW = LayoutHelper.sizeForText(captionLabel.text ?? "", font: captionLabel.font, maxWidth: maxBubbleWidth - 20).width
         
         let maxContentW = max(fileW, metaW)
-        let calcWidthForFile = infoX + maxContentW + 20 // +20 для маргинов
+        let calcWidthForFile = infoX + maxContentW + 20
         
-        let calcWidth = max(max(calcWidthForFile, captionW + 20), 160) // Минимум 160 для файла
+        let calcWidth = max(max(calcWidthForFile, captionW + 20), 160)
         self.customBubbleWidth = min(calcWidth, maxBubbleWidth)
         
         super.layoutSubviews()
@@ -426,10 +425,6 @@ struct LayoutHelper {
         let constraintRect = CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
         
         if isiOS6() {
-            // Если компилируешь старым Xcode, где это доступно:
-            // return nsText.size(withFont: font, constrainedToSize: constraintRect, lineBreakMode: .byWordWrapping)
-            
-            // Если Xcode новый и sizeWithFont не компилится, используем хак через UILabel:
             let label = UILabel(frame: CGRect(x: 0, y: 0, width: maxWidth, height: .greatestFiniteMagnitude))
             label.numberOfLines = 0
             label.font = font

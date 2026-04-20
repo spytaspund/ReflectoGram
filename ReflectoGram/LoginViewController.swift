@@ -77,7 +77,7 @@ class LoginViewController: UIViewController {
         guard let requestUrl = URL(string: fullPath) else { return }
         let request = URLRequest(url: requestUrl)
 
-        print("LOGIN: Запрос QR к \(fullPath)...")
+        print("LOGIN: Requesting QR at \(fullPath)...")
 
         NSURLConnection.sendAsynchronousRequest(request, queue: .main) { [weak self] (response, data, error) in
             guard let self = self else { return }

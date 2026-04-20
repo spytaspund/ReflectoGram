@@ -33,49 +33,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         
         self.title = "Chat"
     }
-    func setupMockMessages() {
-        var mock: [Message] = []
-        
-        // Группа (Входящие)
-        mock.append(self.createMock(id: "1", text: "Очень длинный текст вы бы знали ёёё какой он длинный ооооо уцуалзщцузацозщ", sender: "Hufa", sID: "user1", outgoing: true, type: .text))
-        mock.append(self.createMock(id: "2", text: nil, sender: "Kiza", sID: "user2", outgoing: true, type: .sticker, token: "st_1"))
-        mock.append(self.createMock(id: "3", text: "Мой огромный конфиг на Niri который я писал 4 часа", sender: "Admin", sID: "user3", outgoing: true, type: .image, token: "img_1"))
-        mock.append(self.createMock(id: "3", text: "", sender: "Andey", sID: "user3", outgoing: true, type: .image, token: "img_2"))
-        
-        // Исходящие (ЛС)
-        mock.append(self.createMock(id: "4", text: "Пишу код на iPad 2, полет нормальный", sender: "Me", sID: "me123", outgoing: false, type: .text))
-        mock.append(self.createMock(id: "4", text: "Моя любимая пескунка", sender: "Me", sID: "me123", outgoing: false, type: .audio))
-        mock.append(self.createMock(id: "4", text: "Докладная на романа", sender: "Andey", sID: "me123", outgoing: false, type: .file))
-        
-        self.messages = mock
-        self.tableView.reloadData()
-    }
-
-    func createMock(id: String, text: String?, sender: String, sID: String, outgoing: Bool, type: MessageType, token: String? = nil) -> Message {
-        
-        let mInfo = MediaInfo(
-            has_thumb: true,
-            emoji: (type == .sticker) ? "🔥" : nil,
-            is_animated: false,
-            is_video: false,
-            duration: 65,
-            title: text,
-            performer: sender,
-            question: nil
-        )
-        
-        return Message(
-            id: id,
-            text: text,
-            date: "2026-04-20T13:37:00Z",
-            isOutgoing: outgoing,
-            type: type,
-            sender: sender,
-            senderID: sID,
-            mediaInfo: mInfo,
-            mediaToken: token
-        )
-    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         let defaults = UserDefaults.standard
@@ -186,7 +144,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
  
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
-        let isGroup = !(activeChat?.type == "user" || activeChat?.type == "channel") // Проверь, как у тебя в модели Chat это называется
+        let isGroup = !(activeChat?.type == "user" || activeChat?.type == "channel")
         
         let identifier: String
         switch message.type {
