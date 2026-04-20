@@ -76,6 +76,7 @@
 		AC430B3B2F5764A1009DC28F /* reflectogram-group.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-group.png"; sourceTree = "<group>"; };
 		AC430B3C2F5764A1009DC28F /* reflectogram-background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-background.png"; sourceTree = "<group>"; };
 		AC430B3D2F5764A1009DC28F /* reflectogram-person.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-person.png"; sourceTree = "<group>"; };
+		AC6502032F96AA7E00236BF8 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		AC7E08E22F93BEA60061A562 /* AboutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		AC8561B32F6337160038290A /* MediaPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewController.swift; sourceTree = "<group>"; };
 		ACD54C2A2F50B7BF0016A1FE /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
@@ -110,6 +111,7 @@
 		305D213D2F37C23600893C2B = {
 			isa = PBXGroup;
 			children = (
+				AC6502032F96AA7E00236BF8 /* .gitignore */,
 				305D21482F37C23600893C2B /* ReflectoGram */,
 				305D21542F37C23E00893C2B /* ReflectoGramTests */,
 				305D215E2F37C23E00893C2B /* ReflectoGramUITests */,
