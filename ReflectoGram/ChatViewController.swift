@@ -14,9 +14,15 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var cryptoKey = ""
     var serverURL = ""
     var sessionID = ""
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        if let parentNC = self.tabBarController?.navigationController {
+            parentNC.navigationBar.topItem?.title = "ReflectoGram"
+        } else {
+            self.tabBarController?.navigationItem.title = "ReflectoGram"
+        }
         let defaults = UserDefaults.standard
         let savedUrl = defaults.string(forKey: "serverUrl")
         let savedId = defaults.string(forKey: "sessionId")
@@ -35,6 +41,7 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
             loadDataFromServer()
         }
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self

@@ -227,6 +227,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         if let aboutVC = self.storyboard?.instantiateViewController(withIdentifier: "AboutViewController") as? AboutViewController {
             aboutVC.cachedChat = self.activeChat
             let nav = UINavigationController(rootViewController: aboutVC)
+            nav.modalPresentationStyle = .formSheet
             self.present(nav, animated: true, completion: nil)
         }
     }
@@ -266,6 +267,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
        avatar.backgroundColor = .lightGray
        avatar.layer.cornerRadius = 15
        avatar.clipsToBounds = true
+       avatar.isUserInteractionEnabled = false
+       label.isUserInteractionEnabled = false
+       //titleView.backgroundColor = UIColor.red.withAlphaComponent(0.1) // debug, pls remove later
        if let chatID = activeChat?.id {
            if let diskImage = CacheHelper.shared.getCachedImage(id: chatID, category: .avatar) {
                avatar.image = diskImage

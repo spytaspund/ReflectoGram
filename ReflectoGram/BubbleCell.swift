@@ -254,7 +254,7 @@ class AudioMessageCell: BubbleCell {
         bubbleView.addSubview(coverImageView)
         
         playButton.backgroundColor = UIColor(white: 0, alpha: 0.3)
-        playButton.imageView?.image = UIImage(named: "paperplane")
+        playButton.imageView?.image = UIImage(named: "placeholder")
         bubbleView.addSubview(playButton)
         
         titleLabel.font = UIFont.boldSystemFont(ofSize: 14)

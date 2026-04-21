@@ -28,6 +28,7 @@
 		AC430B3E2F5764A1009DC28F /* reflectogram-group.png in Resources */ = {isa = PBXBuildFile; fileRef = AC430B3B2F5764A1009DC28F /* reflectogram-group.png */; };
 		AC430B3F2F5764A1009DC28F /* reflectogram-background.png in Resources */ = {isa = PBXBuildFile; fileRef = AC430B3C2F5764A1009DC28F /* reflectogram-background.png */; };
 		AC430B402F5764A1009DC28F /* reflectogram-person.png in Resources */ = {isa = PBXBuildFile; fileRef = AC430B3D2F5764A1009DC28F /* reflectogram-person.png */; };
+		AC523CB22F97F88900C9F206 /* AboutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC523CB12F97F88900C9F206 /* AboutCell.swift */; };
 		AC7E08E32F93BEA60061A562 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7E08E22F93BEA60061A562 /* AboutViewController.swift */; };
 		AC8561B42F6337160038290A /* MediaPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8561B32F6337160038290A /* MediaPreviewController.swift */; };
 		ACD54C2B2F50B7BF0016A1FE /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD54C2A2F50B7BF0016A1FE /* MessagesViewController.swift */; };
@@ -76,6 +77,7 @@
 		AC430B3B2F5764A1009DC28F /* reflectogram-group.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-group.png"; sourceTree = "<group>"; };
 		AC430B3C2F5764A1009DC28F /* reflectogram-background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-background.png"; sourceTree = "<group>"; };
 		AC430B3D2F5764A1009DC28F /* reflectogram-person.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-person.png"; sourceTree = "<group>"; };
+		AC523CB12F97F88900C9F206 /* AboutCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutCell.swift; sourceTree = "<group>"; };
 		AC6502032F96AA7E00236BF8 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		AC7E08E22F93BEA60061A562 /* AboutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		AC8561B32F6337160038290A /* MediaPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewController.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				3024CE4A2F3E58F800D23D9D /* placeholder.png */,
 				AC8561B32F6337160038290A /* MediaPreviewController.swift */,
 				AC7E08E22F93BEA60061A562 /* AboutViewController.swift */,
+				AC523CB12F97F88900C9F206 /* AboutCell.swift */,
 			);
 			path = ReflectoGram;
 			sourceTree = "<group>";
@@ -326,6 +329,7 @@
 				AC8561B42F6337160038290A /* MediaPreviewController.swift in Sources */,
 				305D21772F37D95B00893C2B /* ChatCell.swift in Sources */,
 				AC01D5772F4F917000F24ED5 /* SettingsViewController.swift in Sources */,
+				AC523CB22F97F88900C9F206 /* AboutCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
