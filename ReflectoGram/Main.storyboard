@@ -168,7 +168,9 @@
                             <outlet property="delegate" destination="cLh-aG-uXg" id="Q8V-cq-T3h"/>
                         </connections>
                     </tableView>
-                    <tabBarItem key="tabBarItem" title="Me" image="paperplane.png" id="G37-dl-hdl"/>
+                    <tabBarItem key="tabBarItem" title="Me" image="person.png" id="G37-dl-hdl">
+                        <inset key="imageInsets" minX="4" minY="4" maxX="4" maxY="4"/>
+                    </tabBarItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pP3-6D-lr9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -237,7 +239,9 @@
                             <constraint firstItem="Dn7-dd-fyI" firstAttribute="top" secondItem="ogu-he-W9b" secondAttribute="bottom" constant="8" symbolic="YES" id="ugW-jY-bs6"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Settings" image="gear.png" id="gvy-Iv-0eE"/>
+                    <tabBarItem key="tabBarItem" title="Settings" image="gear.png" id="gvy-Iv-0eE">
+                        <inset key="imageInsets" minX="4" minY="4" maxX="4" maxY="4"/>
+                    </tabBarItem>
                     <navigationItem key="navigationItem" id="HdE-sK-tIu"/>
                     <connections>
                         <outlet property="serverField" destination="ogu-he-W9b" id="AX6-MC-J86"/>
@@ -292,7 +296,9 @@
                             <constraint firstItem="63v-34-bln" firstAttribute="top" secondItem="cS5-Im-SWG" secondAttribute="bottom" id="l3T-A7-tJE"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Chats" image="paperplane.png" id="1Z1-PF-rrm"/>
+                    <tabBarItem key="tabBarItem" title="Chats" image="paperplane.png" id="1Z1-PF-rrm">
+                        <inset key="imageInsets" minX="4" minY="4" maxX="4" maxY="4"/>
+                    </tabBarItem>
                     <navigationItem key="navigationItem" id="d9E-cm-z90"/>
                     <connections>
                         <outlet property="tableView" destination="cS5-Im-SWG" id="dFR-dO-EHL"/>
@@ -354,8 +360,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="gear.png" width="30" height="30"/>
-        <image name="paperplane.png" width="30" height="30"/>
+        <image name="gear.png" width="44" height="41"/>
+        <image name="paperplane.png" width="41" height="39"/>
+        <image name="person.png" width="34" height="34"/>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

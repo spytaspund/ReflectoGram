@@ -186,9 +186,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
             }
         case .file:
             if let fileCell = cell as? FileMessageCell {
-                fileCell.fileIconView.image = UIImage(named: "placeholder")
+                fileCell.fileIconView.image = UIImage(named: "document")
                 fileCell.fileNameLabel.text = message.mediaInfo?.title ?? "Document"
-                fileCell.fileMetaLabel.text = ".pptx"
+                fileCell.fileMetaLabel.text = ".md"
             }
         case .audio:
             if let audioCell = cell as? AudioMessageCell {
@@ -196,7 +196,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
                 audioCell.titleLabel.text = message.mediaInfo?.title ?? "Untitled"
                 audioCell.performerLabel.text = message.mediaInfo?.performer ?? "Unknown"
                 audioCell.durationLabel.text = "10:09"
-                audioCell.coverImageView.image = UIImage(named: "reflectogram-group")
+                audioCell.coverImageView.image = UIImage(named: "audio")
             }
         }
         return cell

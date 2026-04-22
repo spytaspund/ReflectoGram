@@ -174,8 +174,9 @@ class ImageMessageCell: BubbleCell {
             captionLabel.frame = CGRect(x: 10, y: photoView.frame.maxY + 4, width: bW - 20, height: captionHeight)
             captionLabel.textColor = isIncoming ? .black : .white
             
-            if legacyUI { timeLabel.frame = CGRect(x: bW - 48, y: bH - 16, width: 50, height: 12) }
-            else { timeLabel.frame = CGRect(x: bW - 40, y: bH - 16, width: 50, height: 12) }
+            /*if legacyUI { timeLabel.frame = CGRect(x: bW - 48, y: bH - 16, width: 50, height: 12) }
+            else { timeLabel.frame = CGRect(x: bW - 40, y: bH - 16, width: 50, height: 12) }*/
+            timeLabel.frame = CGRect(x: bW - 48, y: bH - 16, width: 50, height: 12)
             timeLabel.textColor = isIncoming ? .gray : UIColor(white: 1, alpha: 0.8)
             timeOverlayView.isHidden = true
         } else {
@@ -254,7 +255,7 @@ class AudioMessageCell: BubbleCell {
         bubbleView.addSubview(coverImageView)
         
         playButton.backgroundColor = UIColor(white: 0, alpha: 0.3)
-        playButton.imageView?.image = UIImage(named: "placeholder")
+        playButton.imageView?.image = UIImage(named: "play")
         bubbleView.addSubview(playButton)
         
         titleLabel.font = UIFont.boldSystemFont(ofSize: 14)
@@ -309,6 +310,11 @@ class AudioMessageCell: BubbleCell {
         let topOffset: CGFloat = (isIncoming && isGroup) ? 25 : padding
         if isIncoming && isGroup {
             senderNameLabel.frame = CGRect(x: 10, y: 5, width: bW - 20, height: 15)
+        }
+        if !isIncoming {
+            titleLabel.textColor = UIColor(white: 1, alpha: 1)
+            performerLabel.textColor = UIColor(white: 0.9, alpha: 1)
+            durationLabel.textColor = UIColor(white: 0.9, alpha: 1)
         }
 
         let coverSize: CGFloat = 45

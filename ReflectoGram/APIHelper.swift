@@ -14,6 +14,40 @@ struct TgPrismData: Codable {
     let sender: String
 }
 
+struct SeenOnline: Codable {
+    let type: Int
+    let seenOnline: TimeInterval?
+    
+    enum CodingKeys: String, CodingKey {
+        case type
+        case seenOnline = "seen_online"
+    }
+}
+
+struct ProfileChannel: Codable {
+    let id: Int64
+    let title: String
+    let username: String?
+}
+
+struct ProfileMusic: Codable {
+    let id: String
+    let performer: String
+    let title: String
+    let duration: Int
+}
+
+struct ChatMember: Codable {
+    let id: Int64
+    let name: String
+    let lastSeen: SeenOnline?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, name
+        case lastSeen = "last_seen"
+    }
+}
+
 struct Chat: Codable {
     let id: String
     let name: String
@@ -24,19 +58,22 @@ struct Chat: Codable {
     let username: String?
     let bio: String?
     let phone: String?
-    let isBot: Bool
-    let isVerified: Bool
-    let isScam: Bool
     let isPremium: Bool
     let participantsCount: Int?
+    
+    let seenOnline: SeenOnline?
+    let profileChannel: ProfileChannel?
+    let profileMusic: [ProfileMusic]?
+    let members: [ChatMember]?
 
     enum CodingKeys: String, CodingKey {
         case id, name, date, lastMessage, type, username, bio, phone
-        case isBot = "is_bot"
-        case isVerified = "is_verified"
-        case isScam = "is_scam"
         case isPremium = "is_premium"
         case participantsCount = "participants_count"
+        case seenOnline = "seen_online"
+        case profileChannel = "profile_channel"
+        case profileMusic = "profile_music"
+        case members
     }
 
     init(from decoder: Decoder) throws {
@@ -53,11 +90,13 @@ struct Chat: Codable {
         self.username = try? container.decode(String.self, forKey: .username)
         self.bio = try? container.decode(String.self, forKey: .bio)
         self.phone = try? container.decode(String.self, forKey: .phone)
-        self.isBot = (try? container.decode(Bool.self, forKey: .isBot)) ?? false
-        self.isVerified = (try? container.decode(Bool.self, forKey: .isVerified)) ?? false
-        self.isScam = (try? container.decode(Bool.self, forKey: .isScam)) ?? false
         self.isPremium = (try? container.decode(Bool.self, forKey: .isPremium)) ?? false
         self.participantsCount = try? container.decode(Int.self, forKey: .participantsCount)
+        
+        self.seenOnline = try? container.decode(SeenOnline.self, forKey: .seenOnline)
+        self.profileChannel = try? container.decode(ProfileChannel.self, forKey: .profileChannel)
+        self.profileMusic = try? container.decode([ProfileMusic].self, forKey: .profileMusic)
+        self.members = try? container.decode([ChatMember].self, forKey: .members)
     }
 }
 

@@ -15,14 +15,15 @@ class AboutViewController: UITableViewController {
     var sessionID: String = ""
     var cryptoKey: String = ""
     var userID: String = ""
+    
     enum ProfileRow {
-        case main
+        case main(status: String, isPremium: Bool)
         case music(title: String, artist: String)
-        case channel(name: String, subs: Int)
+        case channel(name: String, username: String?)
         case phone(String)
         case bio(String)
         case username(String)
-        case member(String)
+        case member(name: String, status: String)
     }
     
     var tableSections: [[ProfileRow]] = []
@@ -66,11 +67,23 @@ class AboutViewController: UITableViewController {
     func buildTableData() {
         tableSections.removeAll()
         let chat = fullChat ?? cachedChat
-        tableSections.append([.main])
+        
+        let mainStatus = formatStatus(chat?.seenOnline)
+        tableSections.append([.main(status: mainStatus, isPremium: chat?.isPremium ?? false)])
+        
         var mediaSection: [ProfileRow] = []
-        mediaSection.append(.music(title: "Curse of the crystal skull", artist: "Dr. Steel"))
-        mediaSection.append(.channel(name: "Private channel", subs: 10000))
-        tableSections.append(mediaSection)
+        if let channel = chat?.profileChannel {
+            mediaSection.append(.channel(name: channel.title, username: channel.username))
+        }
+        if let music = chat?.profileMusic, !music.isEmpty {
+            for track in music {
+                mediaSection.append(.music(title: track.title, artist: track.performer))
+            }
+        }
+        if !mediaSection.isEmpty {
+            tableSections.append(mediaSection)
+        }
+        
         var infoSection: [ProfileRow] = []
         if let phone = chat?.phone, !phone.isEmpty {
             infoSection.append(.phone(phone))
@@ -83,6 +96,35 @@ class AboutViewController: UITableViewController {
         }
         if !infoSection.isEmpty {
             tableSections.append(infoSection)
+        }
+        
+        var membersSection: [ProfileRow] = []
+        if let members = chat?.members, !members.isEmpty {
+            for member in members {
+                let memberStatus = formatStatus(member.lastSeen)
+                membersSection.append(.member(name: member.name, status: memberStatus))
+            }
+        }
+        if !membersSection.isEmpty {
+            tableSections.append(membersSection)
+        }
+    }
+    
+    func formatStatus(_ status: SeenOnline?) -> String {
+        guard let status = status else { return "offline" }
+        
+        switch status.type {
+        case 0: return "online"
+        case 1: return "last seen recently"
+        case 2: return "last seen within a week"
+        case 3: return "last seen within a month"
+        case 4:
+            guard let timestamp = status.seenOnline, timestamp > 0 else { return "offline" }
+            let date = Date(timeIntervalSince1970: timestamp)
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd.MM.yy 'at' HH:mm"
+            return "last seen \(formatter.string(from: date))"
+        default: return "offline"
         }
     }
     
@@ -115,11 +157,15 @@ class AboutViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if section == 0 { return nil }
-        if section == 1 { return "Media" }
-        if section == 2 { return "Info" }
-        if section == 3 { return "Members" }
-        return nil
+        guard section < tableSections.count else { return nil }
+        guard let firstItem = tableSections[section].first else { return nil }
+        
+        switch firstItem {
+        case .main: return nil
+        case .music, .channel: return "Media"
+        case .phone, .bio, .username: return "Info"
+        case .member: return "Members"
+        }
     }
     override func numberOfSections(in tableView: UITableView) -> Int {
         return tableSections.count
@@ -140,26 +186,27 @@ class AboutViewController: UITableViewController {
         let rowType = tableSections[indexPath.section][indexPath.row]
                 
         switch rowType {
-        case .main:
+        case .main(let status, let isPremium):
             let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell", for: indexPath) as! ProfileMainCell
-            cell.nameLabel.text = chat?.name ?? "User"
-            cell.statusLabel.text = "online"
+            cell.nameLabel.text = isPremium ? "⭐️ \(chat?.name ?? "User")" : (chat?.name ?? "User")
+            cell.statusLabel.text = status
+            cell.statusLabel.textColor = (status == "online") ? .blue : .gray
             cell.setupButtons(titles: ["Chat", "Call", "Mute"])
             cell.avatarImageView.setAvatar(id: userID, url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)")
             return cell
             
-        case .music:
+        case .music(let title, let artist):
             let cell = tableView.dequeueReusableCell(withIdentifier: "MusicCell", for: indexPath) as! MusicProfileCell
-            cell.coverImageView.image = UIImage(named: "placeholder")
-            cell.titleLabel.text = "Curse of the crystal skull"
-            cell.artistAlbumLabel.text = "Dr. Steel"
+            cell.coverImageView.image = UIImage(named: "audio")
+            cell.titleLabel.text = title
+            cell.artistAlbumLabel.text = artist
             return cell
             
-        case .channel:
+        case .channel(let name, let username):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ChannelCell", for: indexPath) as! ChannelProfileCell
-            cell.nameLabel.text = "Private channel"
-            cell.subLabel.text = "10K subscribers"
-            cell.lastMessageLabel.text = "Latest post about iOS development"
+            cell.nameLabel.text = name
+            cell.subLabel.text = username ?? "channel"
+            cell.lastMessageLabel.text = ""
             cell.avatarImageView.image = UIImage(named: "reflectogram-group")
             return cell
             
@@ -181,12 +228,19 @@ class AboutViewController: UITableViewController {
             cell.detailLabel.text = chat?.username
             return cell
             
-        case .member(let name):
-            let cell = tableView.dequeueReusableCell(withIdentifier: "StandardCell", for: indexPath)
-            cell.textLabel?.text = name
-            cell.textLabel?.font = UIFont.systemFont(ofSize: 16)
-            cell.backgroundColor = isiOS6() ? .white : .clear
-            return cell
+        case .member(let name, let status):
+            var cell = tableView.dequeueReusableCell(withIdentifier: "MemberSubtitleCell")
+            if cell == nil {
+                cell = UITableViewCell(style: .subtitle, reuseIdentifier: "MemberSubtitleCell")
+            }
+            cell?.textLabel?.text = name
+            cell?.textLabel?.font = UIFont.systemFont(ofSize: 16)
+            
+            cell?.detailTextLabel?.text = status
+            cell?.detailTextLabel?.textColor = (status == "online") ? .blue : .gray
+            
+            cell?.backgroundColor = isiOS6() ? .white : .clear
+            return cell!
         }
     }
 
