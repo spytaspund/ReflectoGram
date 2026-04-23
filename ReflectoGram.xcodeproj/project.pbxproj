@@ -32,12 +32,15 @@
 		AC2BCF022F99574700C7846E /* reflectogram-person.png in Resources */ = {isa = PBXBuildFile; fileRef = AC2BCEFF2F99574600C7846E /* reflectogram-person.png */; };
 		AC2BCF032F99574700C7846E /* reflectogram-background.png in Resources */ = {isa = PBXBuildFile; fileRef = AC2BCF002F99574700C7846E /* reflectogram-background.png */; };
 		AC2BCF042F99574700C7846E /* reflectogram-group.png in Resources */ = {isa = PBXBuildFile; fileRef = AC2BCF012F99574700C7846E /* reflectogram-group.png */; };
-		AC2BCF072F995A9000C7846E /* paperplane.png in Resources */ = {isa = PBXBuildFile; fileRef = AC2BCF052F995A9000C7846E /* paperplane.png */; };
-		AC2BCF082F995A9000C7846E /* gear.png in Resources */ = {isa = PBXBuildFile; fileRef = AC2BCF062F995A9000C7846E /* gear.png */; };
-		AC2BCF0A2F995BF000C7846E /* person.png in Resources */ = {isa = PBXBuildFile; fileRef = AC2BCF092F995BF000C7846E /* person.png */; };
 		AC523CB22F97F88900C9F206 /* AboutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC523CB12F97F88900C9F206 /* AboutCell.swift */; };
 		AC7E08E32F93BEA60061A562 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7E08E22F93BEA60061A562 /* AboutViewController.swift */; };
 		AC8561B42F6337160038290A /* MediaPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8561B32F6337160038290A /* MediaPreviewController.swift */; };
+		ACAFE00C2F9AA28600236677 /* gear.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0062F9AA28400236677 /* gear.png */; };
+		ACAFE00D2F9AA28600236677 /* paperplane.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0072F9AA28500236677 /* paperplane.png */; };
+		ACAFE00E2F9AA28600236677 /* paperplane@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0082F9AA28500236677 /* paperplane@2x.png */; };
+		ACAFE00F2F9AA28600236677 /* gear@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0092F9AA28500236677 /* gear@2x.png */; };
+		ACAFE0102F9AA28600236677 /* person.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE00A2F9AA28600236677 /* person.png */; };
+		ACAFE0112F9AA28600236677 /* person@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE00B2F9AA28600236677 /* person@2x.png */; };
 		ACD54C2B2F50B7BF0016A1FE /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD54C2A2F50B7BF0016A1FE /* MessagesViewController.swift */; };
 		ACD54C2D2F50CE710016A1FE /* BubbleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD54C2C2F50CE710016A1FE /* BubbleCell.swift */; };
 /* End PBXBuildFile section */
@@ -88,13 +91,16 @@
 		AC2BCEFF2F99574600C7846E /* reflectogram-person.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-person.png"; sourceTree = "<group>"; };
 		AC2BCF002F99574700C7846E /* reflectogram-background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-background.png"; sourceTree = "<group>"; };
 		AC2BCF012F99574700C7846E /* reflectogram-group.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "reflectogram-group.png"; sourceTree = "<group>"; };
-		AC2BCF052F995A9000C7846E /* paperplane.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = paperplane.png; path = ../../../Downloads/paperplane.png; sourceTree = "<group>"; };
-		AC2BCF062F995A9000C7846E /* gear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = gear.png; path = ../../../Downloads/gear.png; sourceTree = "<group>"; };
-		AC2BCF092F995BF000C7846E /* person.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = person.png; path = ../../../Downloads/person.png; sourceTree = "<group>"; };
 		AC523CB12F97F88900C9F206 /* AboutCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutCell.swift; sourceTree = "<group>"; };
 		AC6502032F96AA7E00236BF8 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		AC7E08E22F93BEA60061A562 /* AboutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		AC8561B32F6337160038290A /* MediaPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewController.swift; sourceTree = "<group>"; };
+		ACAFE0062F9AA28400236677 /* gear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear.png; sourceTree = "<group>"; };
+		ACAFE0072F9AA28500236677 /* paperplane.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = paperplane.png; sourceTree = "<group>"; };
+		ACAFE0082F9AA28500236677 /* paperplane@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "paperplane@2x.png"; sourceTree = "<group>"; };
+		ACAFE0092F9AA28500236677 /* gear@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gear@2x.png"; sourceTree = "<group>"; };
+		ACAFE00A2F9AA28600236677 /* person.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = person.png; sourceTree = "<group>"; };
+		ACAFE00B2F9AA28600236677 /* person@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "person@2x.png"; sourceTree = "<group>"; };
 		ACD54C2A2F50B7BF0016A1FE /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		ACD54C2C2F50CE710016A1FE /* BubbleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubbleCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -160,9 +166,12 @@
 				AC2BCF002F99574700C7846E /* reflectogram-background.png */,
 				AC2BCF012F99574700C7846E /* reflectogram-group.png */,
 				AC2BCEFF2F99574600C7846E /* reflectogram-person.png */,
-				AC2BCF062F995A9000C7846E /* gear.png */,
-				AC2BCF052F995A9000C7846E /* paperplane.png */,
-				AC2BCF092F995BF000C7846E /* person.png */,
+				ACAFE0092F9AA28500236677 /* gear@2x.png */,
+				ACAFE0062F9AA28400236677 /* gear.png */,
+				ACAFE0072F9AA28500236677 /* paperplane.png */,
+				ACAFE0082F9AA28500236677 /* paperplane@2x.png */,
+				ACAFE00A2F9AA28600236677 /* person.png */,
+				ACAFE00B2F9AA28600236677 /* person@2x.png */,
 				AC2BCEED2F99573B00C7846E /* audio.png */,
 				AC2BCEF42F99573C00C7846E /* document.png */,
 				AC2BCEEB2F99573B00C7846E /* message.png */,
@@ -305,19 +314,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				305D214C2F37C23E00893C2B /* Assets.xcassets in Resources */,
+				ACAFE00E2F9AA28600236677 /* paperplane@2x.png in Resources */,
 				AC2BCEFB2F99573C00C7846E /* play.png in Resources */,
-				AC2BCF082F995A9000C7846E /* gear.png in Resources */,
-				AC2BCF072F995A9000C7846E /* paperplane.png in Resources */,
+				ACAFE00F2F9AA28600236677 /* gear@2x.png in Resources */,
+				ACAFE0102F9AA28600236677 /* person.png in Resources */,
+				ACAFE00C2F9AA28600236677 /* gear.png in Resources */,
 				AC2BCF032F99574700C7846E /* reflectogram-background.png in Resources */,
 				3024CE4F2F40EC0A00D23D9D /* Launch Screen.storyboard in Resources */,
 				AC2BCEF62F99573C00C7846E /* phone.png in Resources */,
 				305D216F2F37C26800893C2B /* Main.storyboard in Resources */,
-				AC2BCF0A2F995BF000C7846E /* person.png in Resources */,
 				AC2BCEF92F99573C00C7846E /* premium.png in Resources */,
 				AC2BCEFC2F99573C00C7846E /* mute.png in Resources */,
 				AC2BCEF72F99573C00C7846E /* audio.png in Resources */,
+				ACAFE00D2F9AA28600236677 /* paperplane.png in Resources */,
 				AC2BCEF52F99573C00C7846E /* message.png in Resources */,
 				AC2BCEFE2F99573C00C7846E /* document.png in Resources */,
+				ACAFE0112F9AA28600236677 /* person@2x.png in Resources */,
 				AC2BCF042F99574700C7846E /* reflectogram-group.png in Resources */,
 				AC2BCF022F99574700C7846E /* reflectogram-person.png in Resources */,
 			);

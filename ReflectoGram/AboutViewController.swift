@@ -18,8 +18,8 @@ class AboutViewController: UITableViewController {
     
     enum ProfileRow {
         case main(status: String, isPremium: Bool)
-        case music(title: String, artist: String)
-        case channel(name: String, username: String?)
+        case music(musicID: String, userID: String, title: String, artist: String)
+        case channel(name: String, username: String?, channelID: Int64)
         case phone(String)
         case bio(String)
         case username(String)
@@ -35,6 +35,9 @@ class AboutViewController: UITableViewController {
             self.tableView.backgroundView = nil
             self.tableView.backgroundColor = UIColor(patternImage: UIImage(named: "reflectogram-background") ?? UIImage())
         }*/
+        let doneButton = UIBarButtonItem(title: "Back", style: .done, target: self, action: #selector(dismissProfile))
+        self.navigationItem.rightBarButtonItem = doneButton
+        
         userID = cachedChat?.id ?? "me"
         self.tableView.register(ProfileMainCell.self, forCellReuseIdentifier: "MainCell")
         self.tableView.register(MusicProfileCell.self, forCellReuseIdentifier: "MusicCell")
@@ -64,6 +67,10 @@ class AboutViewController: UITableViewController {
         }
     }
     
+    @objc func dismissProfile() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     func buildTableData() {
         tableSections.removeAll()
         let chat = fullChat ?? cachedChat
@@ -73,11 +80,11 @@ class AboutViewController: UITableViewController {
         
         var mediaSection: [ProfileRow] = []
         if let channel = chat?.profileChannel {
-            mediaSection.append(.channel(name: channel.title, username: channel.username))
+            mediaSection.append(.channel(name: channel.title, username: channel.username, channelID: channel.id))
         }
         if let music = chat?.profileMusic, !music.isEmpty {
             for track in music {
-                mediaSection.append(.music(title: track.title, artist: track.performer))
+                mediaSection.append(.music(musicID: track.id, userID: self.userID, title: track.title, artist: track.performer))
             }
         }
         if !mediaSection.isEmpty {
@@ -130,20 +137,25 @@ class AboutViewController: UITableViewController {
     
     func loadProfileData() {
         let userID = cachedChat?.id ?? "me"
+        
+        if let cachedAbout = CacheHelper.shared.getCachedAbout(forUserID: userID) {
+            self.fullChat = cachedAbout
+            self.buildTableData()
+            self.tableView.reloadData()
+        }
+        
         APIHelper.shared.fetchAbout(from: "\(serverURL)/about?session_id=\(sessionID)&user_id=\(userID)", key: cryptoKey) { [weak self] result in
             guard let self = self else { return }
-            
             switch result {
             case .success(let chat):
                 self.fullChat = chat
+                CacheHelper.shared.saveAbout(chat, forUserID: userID)
+                
                 self.setTitle(name: self.fullChat?.name ?? "User")
                 self.buildTableData()
                 self.tableView.reloadData()
-
             case .failure(let error):
                 print("Error loading profile: \(error)")
-                let alert = UIAlertView(title: "API Error", message: "Failed to load profile", delegate: nil, cancelButtonTitle: "OK")
-                alert.show()
             }
         }
     }
@@ -195,19 +207,19 @@ class AboutViewController: UITableViewController {
             cell.avatarImageView.setAvatar(id: userID, url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)")
             return cell
             
-        case .music(let title, let artist):
+        case .music(let musicID, let userID, let title, let artist):
             let cell = tableView.dequeueReusableCell(withIdentifier: "MusicCell", for: indexPath) as! MusicProfileCell
-            cell.coverImageView.image = UIImage(named: "audio")
+            cell.coverImageView.setTrackCover(musicId: musicID, userId: userID, serverURL: self.serverURL, sessionID: self.sessionID)
             cell.titleLabel.text = title
             cell.artistAlbumLabel.text = artist
             return cell
             
-        case .channel(let name, let username):
+        case .channel(let name, let username, let channelID):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ChannelCell", for: indexPath) as! ChannelProfileCell
             cell.nameLabel.text = name
             cell.subLabel.text = username ?? "channel"
             cell.lastMessageLabel.text = ""
-            cell.avatarImageView.image = UIImage(named: "reflectogram-group")
+            cell.avatarImageView.setAvatar(id: "\(channelID)", url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)")
             return cell
             
         case .phone:

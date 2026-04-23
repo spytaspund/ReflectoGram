@@ -53,9 +53,15 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
 
     func loadMessages() {
         guard let chatID = activeChat?.id else { return }
+        if let cached = CacheHelper.shared.getCachedMessages(forChatID: chatID) {
+            self.messages = Array(cached.reversed())
+            self.tableView.reloadData()
+            self.scrollToBottom()
+        }
+
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        
         let url = "\(self.serverURL)/messages?chat_id=\(chatID)&session_id=\(self.sessionID)"
+        
         APIHelper.shared.fetchMessages(from: url, key: cryptoKey) { [weak self] result in
             DispatchQueue.main.async {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -63,9 +69,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
                 
                 switch result {
                 case .success(let loadedMessages):
+                    CacheHelper.shared.saveMessages(loadedMessages, forChatID: chatID)
+                    
                     self.messages = Array(loadedMessages.reversed())
                     if let tv = self.tableView { tv.reloadData() }
                     self.scrollToBottom()
+                    
                 case .failure(let error):
                     print("Fetch error: \(error.localizedDescription)")
                 }

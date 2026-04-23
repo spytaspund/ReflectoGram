@@ -6,6 +6,8 @@ enum CacheCategory {
     case thumb
     case full
     case messages
+    case about
+    case albumCover
 }
 
 class CacheHelper {
@@ -20,13 +22,14 @@ class CacheHelper {
     private var messagesPath: String { (documentsPath as NSString).appendingPathComponent("messages") }
     private var thumbPath: String { (documentsPath as NSString).appendingPathComponent("media/thumb") }
     private var fullPath: String { (documentsPath as NSString).appendingPathComponent("media/full") }
+    private var aboutPath: String { (documentsPath as NSString).appendingPathComponent("about") }
     
     private init() {
         createDirectoriesIfNeeded()
     }
     
     private func createDirectoriesIfNeeded() {
-        let paths = [avatarsPath, messagesPath, thumbPath, fullPath]
+        let paths = [avatarsPath, messagesPath, thumbPath, fullPath, aboutPath]
         for path in paths {
             if !fileManager.fileExists(atPath: path) {
                 do {
@@ -40,14 +43,29 @@ class CacheHelper {
 
     private func getPath(for category: CacheCategory, id: String) -> String {
         let folder: String
+        let fileName: String
+        
         switch category {
-        case .avatar: folder = avatarsPath
-        case .thumb: folder = thumbPath
-        case .full: folder = fullPath
-        case .messages: folder = messagesPath
+        case .avatar:
+            folder = avatarsPath
+            fileName = "\(id).png"
+        case .thumb:
+            folder = thumbPath
+            fileName = "\(id).png"
+        case .full:
+            folder = fullPath
+            fileName = "\(id).png"
+        case .messages:
+            folder = messagesPath
+            fileName = "msg_\(id).json"
+        case .about:
+            folder = aboutPath
+            fileName = "about_\(id).json"
+        case .albumCover:
+            folder = thumbPath
+            fileName = "audio_\(id).png"
         }
         
-        let fileName = category == .messages ? "msg_\(id).json" : "\(id).png"
         return (folder as NSString).appendingPathComponent(fileName)
     }
 
@@ -85,6 +103,16 @@ class CacheHelper {
     
     func getCachedChats() -> [Chat]? {
         let path = (documentsPath as NSString).appendingPathComponent("cached_chats.json")
+        return loadObject(fromPath: path)
+    }
+    
+    func saveAbout(_ chat: Chat, forUserID userID: String) {
+        let path = getPath(for: .about, id: userID)
+        saveObject(chat, toPath: path)
+    }
+    
+    func getCachedAbout(forUserID userID: String) -> Chat? {
+        let path = getPath(for: .about, id: userID)
         return loadObject(fromPath: path)
     }
     

@@ -285,7 +285,7 @@ class APIHelper {
         
         guard let url = URL(string: urlString) else { completion(nil); return }
         
-        NSURLConnection.sendAsynchronousRequest(URLRequest(url: url), queue: .main) { [weak self] _, data, _ in
+        NSURLConnection.sendAsynchronousRequest(URLRequest(url: url), queue: .main) { [weak self] response, data, error in
             if let imageData = data, let image = UIImage(data: imageData) {
                 CacheHelper.shared.saveImage(image: image, id: cacheKey, category: category)
                 self?.imageCache.setObject(image, forKey: nsKey)
@@ -326,6 +326,18 @@ extension UIImageView {
                 self?.backgroundColor = .clear
                 self?.viewWithTag(999)?.removeFromSuperview()
                 self?.image = image
+            }
+        }
+    }
+    func setTrackCover(musicId: String, userId: String, serverURL: String, sessionID: String) {
+        self.image = UIImage(named: "audio")
+        self.accessibilityIdentifier = musicId
+        
+        let url = "\(serverURL)/get_media?session_id=\(sessionID)&music_id=\(musicId)&user_id=\(userId)&thumb"
+        
+        APIHelper.shared.fetchImage(urlString: url, cacheKey: musicId, category: .albumCover) { [weak self] image in
+            if self?.accessibilityIdentifier == musicId {
+                self?.image = image ?? UIImage(named: "audio")
             }
         }
     }
