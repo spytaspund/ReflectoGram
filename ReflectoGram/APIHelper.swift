@@ -28,6 +28,8 @@ struct ProfileChannel: Codable {
     let id: Int64
     let title: String
     let username: String?
+    let subs_count: Int
+    let last_post: String
 }
 
 struct ProfileMusic: Codable {
@@ -97,6 +99,23 @@ struct Chat: Codable {
         self.profileChannel = try? container.decode(ProfileChannel.self, forKey: .profileChannel)
         self.profileMusic = try? container.decode([ProfileMusic].self, forKey: .profileMusic)
         self.members = try? container.decode([ChatMember].self, forKey: .members)
+    }
+    
+    init(id: String, name: String, type: String = "user") {
+        self.id = id
+        self.name = name
+        self.type = type
+        self.date = ""
+        self.lastMessage = ""
+        self.username = nil
+        self.bio = nil
+        self.phone = nil
+        self.isPremium = false
+        self.participantsCount = nil
+        self.seenOnline = nil
+        self.profileChannel = nil
+        self.profileMusic = nil
+        self.members = nil
     }
 }
 

@@ -165,7 +165,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as! BubbleCell
-        
+        cell.delegate = self
         cell.isIncoming = !message.isOutgoing
         cell.isGroup = isGroup
         cell.setupBaseUI()
@@ -293,4 +293,18 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
        titleView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]
        self.navigationItem.titleView = titleView
    }
+}
+
+extension MessagesViewController: BubbleCellDelegate {
+    func didTapAvatar(in cell: BubbleCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let message = messages[indexPath.row]
+        let tempChat = Chat(id: message.senderID, name: message.sender)
+        if let previewVC = self.storyboard?.instantiateViewController(withIdentifier: "AboutViewController") as? AboutViewController {
+            previewVC.cachedChat = tempChat
+            let nav = UINavigationController(rootViewController: previewVC)
+            nav.modalPresentationStyle = .formSheet
+            self.present(nav, animated: true, completion: nil)
+        }
+    }
 }

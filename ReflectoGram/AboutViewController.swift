@@ -17,9 +17,9 @@ class AboutViewController: UITableViewController {
     var userID: String = ""
     
     enum ProfileRow {
-        case main(status: String, isPremium: Bool)
+        case main(status: String, isPremium: Bool, chatType: String)
         case music(musicID: String, userID: String, title: String, artist: String)
-        case channel(name: String, username: String?, channelID: Int64)
+        case channel(name: String, channelID: Int64, lastPost: String, subsCount: Int)
         case phone(String)
         case bio(String)
         case username(String)
@@ -76,11 +76,11 @@ class AboutViewController: UITableViewController {
         let chat = fullChat ?? cachedChat
         
         let mainStatus = formatStatus(chat?.seenOnline)
-        tableSections.append([.main(status: mainStatus, isPremium: chat?.isPremium ?? false)])
+        tableSections.append([.main(status: mainStatus, isPremium: chat?.isPremium ?? false, chatType: chat?.type ?? "user")])
         
         var mediaSection: [ProfileRow] = []
         if let channel = chat?.profileChannel {
-            mediaSection.append(.channel(name: channel.title, username: channel.username, channelID: channel.id))
+            mediaSection.append(.channel(name: channel.title, channelID: channel.id, lastPost: channel.last_post, subsCount: channel.subs_count))
         }
         if let music = chat?.profileMusic, !music.isEmpty {
             for track in music {
@@ -198,12 +198,14 @@ class AboutViewController: UITableViewController {
         let rowType = tableSections[indexPath.section][indexPath.row]
                 
         switch rowType {
-        case .main(let status, let isPremium):
+        case .main(let status, let isPremium, let chatType):
             let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell", for: indexPath) as! ProfileMainCell
-            cell.nameLabel.text = isPremium ? "⭐️ \(chat?.name ?? "User")" : (chat?.name ?? "User")
+            cell.delegate = self
+            cell.nameLabel.text = chat?.name ?? "User"
             cell.statusLabel.text = status
             cell.statusLabel.textColor = (status == "online") ? .blue : .gray
-            cell.setupButtons(titles: ["Chat", "Call", "Mute"])
+            cell.setupButtons(for: chatType)
+            cell.setPremium(isPremium)
             cell.avatarImageView.setAvatar(id: userID, url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)")
             return cell
             
@@ -214,12 +216,12 @@ class AboutViewController: UITableViewController {
             cell.artistAlbumLabel.text = artist
             return cell
             
-        case .channel(let name, let username, let channelID):
+        case .channel(let name, let channelID, let lastPost, let subsCount):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ChannelCell", for: indexPath) as! ChannelProfileCell
             cell.nameLabel.text = name
-            cell.subLabel.text = username ?? "channel"
-            cell.lastMessageLabel.text = ""
-            cell.avatarImageView.setAvatar(id: "\(channelID)", url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)")
+            cell.subLabel.text = "\(subsCount) subscribers"
+            cell.lastMessageLabel.text = lastPost
+            cell.avatarImageView.setAvatar(id: "\(channelID)", url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(channelID)")
             return cell
             
         case .phone:
@@ -278,6 +280,39 @@ class AboutViewController: UITableViewController {
             
         case .member:
             return 50
+        }
+    }
+}
+
+extension AboutViewController: ProfileMainCellDelegate {
+    func didTapChatButton() {
+        let chatToOpen = self.fullChat ?? self.cachedChat
+        let presentingVC = self.presentingViewController
+        
+        self.dismiss(animated: true) {
+            var targetNav: UINavigationController?
+            if let splitVC = presentingVC as? UISplitViewController {
+
+                targetNav = splitVC.viewControllers.last as? UINavigationController
+            }
+            else if let tab = presentingVC as? UITabBarController {
+                targetNav = tab.selectedViewController as? UINavigationController
+            }
+            else {
+                targetNav = presentingVC as? UINavigationController ?? presentingVC?.navigationController
+            }
+            guard let navigationController = targetNav else { return }
+            if let currentMsgsVC = navigationController.topViewController as? MessagesViewController {
+                if currentMsgsVC.activeChat?.id == chatToOpen?.id {
+                    return
+                }
+            }
+
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let msgsVC = storyboard.instantiateViewController(withIdentifier: "MessagesVC") as? MessagesViewController {
+                msgsVC.activeChat = chatToOpen
+                navigationController.pushViewController(msgsVC, animated: true)
+            }
         }
     }
 }

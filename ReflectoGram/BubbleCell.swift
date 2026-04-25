@@ -5,7 +5,12 @@ func isiOS6() -> Bool {
     return version < 7.0
 }
 
+protocol BubbleCellDelegate: AnyObject {
+    func didTapAvatar(in cell: BubbleCell)
+}
+
 class BubbleCell: UITableViewCell {
+    weak var delegate: BubbleCellDelegate?
     let legacyUI = isiOS6()
     var senderNameLabel = UILabel()
     var timeLabel = UILabel()
@@ -32,40 +37,46 @@ class BubbleCell: UITableViewCell {
         bubbleView.layer.cornerRadius = 12
         senderNameLabel.font = UIFont.boldSystemFont(ofSize: 12)
         avatarImageView.clipsToBounds = true // sussy, remove if it crashes
+        avatarImageView.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(avatarTapped))
+        avatarImageView.addGestureRecognizer(tap)
     }
 
     override func layoutSubviews() {
-            super.layoutSubviews()
-            let screenWidth = contentView.frame.width
-            let maxBubbleWidth = screenWidth * 0.75
-            let finalBubbleWidth = customBubbleWidth ?? maxBubbleWidth
+        super.layoutSubviews()
+        let screenWidth = contentView.frame.width
+        let maxBubbleWidth = screenWidth * 0.75
+        let finalBubbleWidth = customBubbleWidth ?? maxBubbleWidth
 
-            if isIncoming {
-                var xPos: CGFloat
-                if isGroup {
-                    avatarImageView.isHidden = false
-                    avatarImageView.frame = CGRect(x: 8, y: 8, width: 35, height: 35)
-                    xPos = 50
-                } else {
-                    avatarImageView.isHidden = true
-                    xPos = 10
-                }
-                bubbleView.frame = CGRect(x: xPos, y: 8, width: finalBubbleWidth, height: contentView.frame.height - 10)
-                bubbleView.backgroundColor = UIColor(red: 0.9, green: 0.9, blue: 0.92, alpha: 1.0)
-                senderNameLabel.isHidden = !isGroup
+        if isIncoming {
+            var xPos: CGFloat
+            if isGroup {
+                avatarImageView.isHidden = false
+                avatarImageView.frame = CGRect(x: 8, y: 8, width: 35, height: 35)
+                xPos = 50
             } else {
                 avatarImageView.isHidden = true
-                let xPos = screenWidth - finalBubbleWidth - 16
-                bubbleView.frame = CGRect(x: xPos, y: 8, width: finalBubbleWidth, height: contentView.frame.height - 10)
-                if legacyUI { bubbleView.backgroundColor = UIColor(red: 0.3, green: 0.85, blue: 0.39, alpha: 1.0) }
-                else { bubbleView.backgroundColor = UIColor(red: 0.0, green: 0.48, blue: 1.0, alpha: 1.0) }
-                timeLabel.textColor = UIColor(white: 1, alpha: 0.85)
-                senderNameLabel.isHidden = true
+                xPos = 10
             }
-            
-            if legacyUI { avatarImageView.layer.cornerRadius = 12 }
-            else { avatarImageView.layer.cornerRadius = 17.5 }
+            bubbleView.frame = CGRect(x: xPos, y: 8, width: finalBubbleWidth, height: contentView.frame.height - 10)
+            bubbleView.backgroundColor = UIColor(red: 0.9, green: 0.9, blue: 0.92, alpha: 1.0)
+            senderNameLabel.isHidden = !isGroup
+        } else {
+            avatarImageView.isHidden = true
+            let xPos = screenWidth - finalBubbleWidth - 16
+            bubbleView.frame = CGRect(x: xPos, y: 8, width: finalBubbleWidth, height: contentView.frame.height - 10)
+            if legacyUI { bubbleView.backgroundColor = UIColor(red: 0.3, green: 0.85, blue: 0.39, alpha: 1.0) }
+            else { bubbleView.backgroundColor = UIColor(red: 0.0, green: 0.48, blue: 1.0, alpha: 1.0) }
+            timeLabel.textColor = UIColor(white: 1, alpha: 0.85)
+            senderNameLabel.isHidden = true
         }
+        
+        if legacyUI { avatarImageView.layer.cornerRadius = 12 }
+        else { avatarImageView.layer.cornerRadius = 17.5 }
+    }
+    @objc func avatarTapped() {
+        delegate?.didTapAvatar(in: self)
+    }
 }
 
 class TextMessageCell: BubbleCell {

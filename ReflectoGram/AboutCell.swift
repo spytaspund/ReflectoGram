@@ -9,12 +9,17 @@ import Foundation
 import UIKit
 import QuartzCore
 
+protocol ProfileMainCellDelegate: AnyObject {
+    func didTapChatButton()
+}
+
 class ProfileMainCell: UITableViewCell {
     let legacyUI = isiOS6()
-    
+    weak var delegate: ProfileMainCellDelegate?
     var avatarImageView = UIImageView()
     var nameLabel = UILabel()
     var statusLabel = UILabel()
+    var premiumImageView = UIImageView()
     var buttonsContainer = UIView()
     var actionButtons: [UIButton] = []
     
@@ -38,7 +43,12 @@ class ProfileMainCell: UITableViewCell {
         avatarImageView.addGestureRecognizer(tapGesture)
         
         nameLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        nameLabel.lineBreakMode = .byTruncatingTail
         contentView.addSubview(nameLabel)
+        
+        premiumImageView.contentMode = .scaleAspectFit
+        premiumImageView.isHidden = true
+        contentView.addSubview(premiumImageView)
         
         statusLabel.font = UIFont.systemFont(ofSize: 14)
         statusLabel.textColor = .gray
@@ -47,37 +57,70 @@ class ProfileMainCell: UITableViewCell {
         contentView.addSubview(buttonsContainer)
     }
     
-    func setupButtons(titles: [String]) {
+    private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage {
+        let size = image.size
+        let widthRatio  = targetSize.width  / size.width
+        let heightRatio = targetSize.height / size.height
+        let newSize = widthRatio > heightRatio ?
+            CGSize(width: size.width * heightRatio, height: size.height * heightRatio) :
+            CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
+        image.draw(in: CGRect(origin: .zero, size: newSize))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage ?? image
+    }
+
+    func setupButtons(for type: String) {
         buttonsContainer.subviews.forEach { $0.removeFromSuperview() }
         actionButtons.removeAll()
+        let buttonConfig: [(String, String)]
         
-        for title in titles {
+        switch type {
+        case "channel":
+            buttonConfig = [("Mute", "mute"), ("Discuss", "message"), ("Link", "paperplane")]
+        case "group":
+            buttonConfig = [("Chat", "message"), ("Mute", "mute"), ("Video", "phone")]
+        default:
+            buttonConfig = [("Chat", "message"), ("Call", "phone"), ("Mute", "mute")]
+        }
+        
+        for config in buttonConfig {
             let btn = UIButton(type: .custom)
-            btn.setTitle(title, for: .normal)
-            btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 13)
+            btn.setTitle(config.0, for: .normal)
+            btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 11)
+            btn.titleLabel?.adjustsFontSizeToFitWidth = true
+            btn.titleLabel?.minimumScaleFactor = 0.8
+            btn.contentHorizontalAlignment = .center
             
-            if legacyUI {
-                btn.setTitleColor(.white, for: .normal)
-                btn.setTitleColor(.lightGray, for: .highlighted)
-                
-                let gradient = CAGradientLayer()
-                gradient.frame = CGRect(x: 0, y: 0, width: 70, height: 32)
-                gradient.colors = [
-                    UIColor(red: 0.4, green: 0.6, blue: 0.9, alpha: 1).cgColor,
-                    UIColor(red: 0.1, green: 0.3, blue: 0.7, alpha: 1).cgColor
-                ]
-                gradient.cornerRadius = 4
-                gradient.borderWidth = 0.5
-                gradient.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
-                btn.layer.insertSublayer(gradient, at: 0)
-                btn.clipsToBounds = true
-            } else {
-                btn.setTitleColor(.systemBlue, for: .normal)
+            if let icon = UIImage(named: config.1) {
+                let scaledIcon = resizeImage(image: icon, targetSize: CGSize(width: 16, height: 16))
+                btn.setImage(scaledIcon, for: .normal)
+                btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
+                btn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4)
+            }
+            btn.backgroundColor = UIColor(white: 0.6, alpha: 1.0)
+            btn.setTitleColor(.white, for: .normal)
+            btn.tintColor = .white
+            btn.layer.cornerRadius = 8
+            btn.clipsToBounds = true
+            
+            if config.0 == "Chat" || config.0 == "Discuss" {
+                btn.addTarget(self, action: #selector(chatTapped), for: .touchUpInside)
             }
             
             buttonsContainer.addSubview(btn)
             actionButtons.append(btn)
         }
+    }
+    
+    func setPremium(_ isPremium: Bool) {
+        premiumImageView.isHidden = !isPremium
+        if isPremium && premiumImageView.image == nil {
+            premiumImageView.image = UIImage(named: "premium")
+        }
+        self.setNeedsLayout()
     }
     
     override func layoutSubviews() {
@@ -88,17 +131,30 @@ class ProfileMainCell: UITableViewCell {
         avatarImageView.layer.cornerRadius = legacyUI ? 10 : 35
         
         let textX = avatarImageView.frame.maxX + 16
-        nameLabel.frame = CGRect(x: textX, y: 28, width: w - textX - 16, height: 24)
+        
+        nameLabel.sizeToFit()
+        let premiumSpace: CGFloat = premiumImageView.isHidden ? 0 : 24
+        let maxNameWidth = w - textX - 16 - premiumSpace
+        let actualNameWidth = min(nameLabel.frame.width, maxNameWidth)
+        
+        nameLabel.frame = CGRect(x: textX, y: 28, width: actualNameWidth, height: 24)
+        
+        if !premiumImageView.isHidden {
+            premiumImageView.frame = CGRect(x: nameLabel.frame.maxX + 4, y: 30, width: 20, height: 20)
+        }
+        
         statusLabel.frame = CGRect(x: textX, y: nameLabel.frame.maxY + 2, width: w - textX - 16, height: 18)
         buttonsContainer.frame = CGRect(x: 16, y: avatarImageView.frame.maxY + 16, width: w - 32, height: 32)
         
-        let spacing: CGFloat = 8
-        let btnW = (buttonsContainer.frame.width - (spacing * CGFloat(actionButtons.count - 1))) / CGFloat(actionButtons.count)
-        
-        for (i, btn) in actionButtons.enumerated() {
-            btn.frame = CGRect(x: CGFloat(i) * (btnW + spacing), y: 0, width: btnW, height: 32)
-            if let grad = btn.layer.sublayers?.first as? CAGradientLayer {
-                grad.frame = btn.bounds
+        if !actionButtons.isEmpty {
+            let spacing: CGFloat = 8
+            let btnW = (buttonsContainer.frame.width - (spacing * CGFloat(actionButtons.count - 1))) / CGFloat(actionButtons.count)
+            
+            for (i, btn) in actionButtons.enumerated() {
+                btn.frame = CGRect(x: CGFloat(i) * (btnW + spacing), y: 0, width: btnW, height: 32)
+                if let grad = btn.layer.sublayers?.first as? CAGradientLayer {
+                    grad.frame = btn.bounds
+                }
             }
         }
     }
@@ -110,6 +166,10 @@ class ProfileMainCell: UITableViewCell {
         spin.timingFunctions = [CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)]
         spin.duration = 1.2
         avatarImageView.layer.add(spin, forKey: "spin")
+    }
+    
+    @objc func chatTapped() {
+        delegate?.didTapChatButton()
     }
 }
 
