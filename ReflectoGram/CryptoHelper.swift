@@ -48,4 +48,39 @@ class CryptoService {
         }
         return decryptedData.prefix(numBytesDecrypted)
     }
+    
+    static func encrypt(data: Data, keyHex: String) throws -> Data {
+            guard let keyData = Data(hexString: keyHex.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+                throw DecryptionError.invalidKeyOrIV
+            }
+            
+            var ivData = Data(count: 16)
+            let result = ivData.withUnsafeMutableBytes {
+                SecRandomCopyBytes(kSecRandomDefault, 16, $0.baseAddress!)
+            }
+            guard result == errSecSuccess else { throw DecryptionError.decryptionFailed }
+            let bufferSize = data.count + kCCBlockSizeAES128
+            var encryptedData = Data(count: bufferSize)
+            var numBytesEncrypted: size_t = 0
+            let status = encryptedData.withUnsafeMutableBytes { encryptedBytes in
+                data.withUnsafeBytes { dataBytes in
+                    ivData.withUnsafeBytes { ivBytes in
+                        keyData.withUnsafeBytes { keyBytes in
+                            CCCrypt(CCOperation(kCCEncrypt),
+                                    CCAlgorithm(kCCAlgorithmAES),
+                                    CCOptions(kCCOptionPKCS7Padding),
+                                    keyBytes.baseAddress, keyData.count,
+                                    ivBytes.baseAddress,
+                                    dataBytes.baseAddress, data.count,
+                                    encryptedBytes.baseAddress, bufferSize,
+                                    &numBytesEncrypted)
+                        }
+                    }
+                }
+            }
+            guard status == kCCSuccess else {
+                throw DecryptionError.decryptionFailed
+            }
+            return ivData + encryptedData.prefix(numBytesEncrypted)
+        }
 }

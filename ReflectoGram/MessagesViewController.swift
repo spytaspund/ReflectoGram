@@ -8,6 +8,14 @@ import UIKit
 
 class MessagesViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var inputContainerView: UIView!
+    @IBOutlet weak var messageTextView: UITextView!
+    @IBOutlet weak var sendButton: UIButton!
+    @IBOutlet weak var inputContainerBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var inputContainerHeightConstraint: NSLayoutConstraint!
+    let minInputHeight: CGFloat = 48.0
+    let maxInputHeight: CGFloat = 120.0
+    var keyboardHeight: CGFloat = 0.0
     var messages: [Message] = []
     var activeChat: Chat?
     var serverURL = ""
@@ -31,7 +39,20 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.backgroundView = bgImageView
         tableView.backgroundColor = .clear
         
+        messageTextView.delegate = self
+        messageTextView.layer.cornerRadius = 6
+        messageTextView.layer.borderWidth = 1
+        messageTextView.layer.borderColor = UIColor.lightGray.cgColor
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
+
         self.title = "Chat"
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -241,6 +262,72 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
+    @objc func keyboardWillShow(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
+              let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval else { return }
+        
+        let keyboardFrame = frameValue.cgRectValue
+        let convertedFrame = view.convert(keyboardFrame, from: nil)
+        let height = view.bounds.height - convertedFrame.origin.y
+        
+        self.keyboardHeight = height
+        inputContainerBottomConstraint.constant = height
+        
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+            self.scrollToBottom()
+        }
+    }
+    
+    @objc func keyboardWillHide(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval else { return }
+        inputContainerBottomConstraint.constant = 0
+        
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    func updateInputHeight() {
+        let fixedWidth = messageTextView.frame.size.width
+        let newSize = messageTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+        var newHeight = newSize.height + 12
+        
+        if newHeight < minInputHeight { newHeight = minInputHeight }
+        if newHeight > maxInputHeight {
+            newHeight = maxInputHeight
+            messageTextView.isScrollEnabled = true
+        } else {
+            messageTextView.isScrollEnabled = false
+        }
+        if inputContainerHeightConstraint.constant != newHeight {
+            inputContainerHeightConstraint.constant = newHeight
+            UIView.animate(withDuration: 0.2) {
+                self.view.layoutIfNeeded()
+                self.scrollToBottom()
+            }
+        }
+    }
+    
+    @objc func sendButtonTapped() {
+        guard let text = messageTextView.text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard let chatID = activeChat?.id else { return }
+        
+        let messageText = text
+        messageTextView.text = ""
+        updateInputHeight()
+        sendButton.isEnabled = false
+        
+        APIHelper.shared.sendMessage(text: messageText, chatID: chatID, sessionID: sessionID, serverURL: serverURL, keyHex: cryptoKey) { [weak self] success in
+            guard let self = self else { return }
+            self.sendButton.isEnabled = true
+            
+            if success { self.loadMessages()}
+            else { print("Failed to send message") }
+        }
+    }
+    
     func setupTitleView(name: String) {
        let avatarSize: CGFloat = 30
        let spacing: CGFloat = 8
@@ -306,5 +393,11 @@ extension MessagesViewController: BubbleCellDelegate {
             nav.modalPresentationStyle = .formSheet
             self.present(nav, animated: true, completion: nil)
         }
+    }
+}
+
+extension MessagesViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        updateInputHeight()
     }
 }

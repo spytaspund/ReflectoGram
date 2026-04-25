@@ -207,6 +207,13 @@ struct MessagesResponseContainer: Codable {
     let messages: [Message]?
 }
 
+struct SendMessageResponse: Codable {
+    let status: String
+    let id: String?
+    let date: String?
+    let reason: String?
+}
+
 extension Data {
     init?(hexString: String) {
         let len = hexString.count / 2
@@ -310,6 +317,49 @@ class APIHelper {
                 self?.imageCache.setObject(image, forKey: nsKey)
                 completion(image)
             } else { completion(nil) }
+        }
+    }
+    func sendMessage(text: String, chatID: String, sessionID: String, serverURL: String, keyHex: String, completion: @escaping (Bool) -> Void) {
+        let urlString = "\(serverURL)/send_message?chat_id=\(chatID)&session_id=\(sessionID)"
+        guard let url = URL(string: urlString) else {
+            completion(false)
+            return
+        }
+        
+        let payload = ["text": text]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+            completion(false)
+            return
+        }
+        
+        guard let encryptedData = try? CryptoService.encrypt(data: jsonData, keyHex: keyHex) else {
+            completion(false)
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = encryptedData
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+        
+        NSURLConnection.sendAsynchronousRequest(request, queue: .main) { response, data, error in
+            if error != nil {
+                completion(false)
+                return
+            }
+            guard let responseData = data else {
+                completion(false)
+                return
+            }
+            
+            do {
+                let decrypted = try CryptoService.decrypt(data: responseData, keyHex: keyHex)
+                let result = try JSONDecoder().decode(SendMessageResponse.self, from: decrypted)
+                completion(result.status == "ok")
+            } catch {
+                print("Send message decryption/decode error: \(error)")
+                completion(false)
+            }
         }
     }
 }

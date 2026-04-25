@@ -303,25 +303,79 @@
             <point key="canvasLocation" x="2334" y="849"/>
         </scene>
         <!--Messages View Controller-->
-        <scene sceneID="Mju-3C-Rre">
+        <scene sceneID="2dg-Bn-cG5">
             <objects>
-                <tableViewController storyboardIdentifier="MessagesVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="nPZ-WJ-WzZ" customClass="MessagesViewController" customModule="ReflectoGram" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="100" sectionHeaderHeight="1" sectionFooterHeight="1" contentViewInsetsToSafeArea="NO" id="aDP-7H-1w9">
+                <viewController storyboardIdentifier="MessagesVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="aFH-f5-L3J" customClass="MessagesViewController" customModule="ReflectoGram" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="sP7-Dp-Tdt"/>
+                        <viewControllerLayoutGuide type="bottom" id="PDr-bc-lCs"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="nk9-lG-t3D">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jgV-q4-hPk">
+                                <rect key="frame" x="0.0" y="520" width="320" height="48"/>
+                                <subviews>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" scrollEnabled="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="OmF-D0-8XK">
+                                        <rect key="frame" x="16" y="8" width="228" height="32"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <color key="textColor" systemColor="labelColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lkG-50-sMf">
+                                        <rect key="frame" x="252" y="8" width="60" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="60" id="WPi-DA-imC"/>
+                                        </constraints>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Send">
+                                            <fontDescription key="titleFontDescription" type="system" pointSize="15"/>
+                                            <color key="baseForegroundColor" systemColor="linkColor"/>
+                                        </buttonConfiguration>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="OmF-D0-8XK" secondAttribute="bottom" constant="8" id="HJS-q9-QIP"/>
+                                    <constraint firstItem="OmF-D0-8XK" firstAttribute="top" secondItem="jgV-q4-hPk" secondAttribute="top" constant="8" id="KKd-dn-yxx"/>
+                                    <constraint firstAttribute="trailing" secondItem="lkG-50-sMf" secondAttribute="trailing" constant="8" id="KbA-zN-DM1"/>
+                                    <constraint firstItem="OmF-D0-8XK" firstAttribute="leading" secondItem="jgV-q4-hPk" secondAttribute="leading" constant="16" id="MuF-UC-SEp"/>
+                                    <constraint firstItem="lkG-50-sMf" firstAttribute="top" secondItem="jgV-q4-hPk" secondAttribute="top" constant="8" id="bfr-IY-dJg"/>
+                                    <constraint firstAttribute="bottom" secondItem="lkG-50-sMf" secondAttribute="bottom" constant="8" id="bms-nk-aIx"/>
+                                    <constraint firstAttribute="height" constant="48" id="rp1-3P-bOX"/>
+                                    <constraint firstItem="lkG-50-sMf" firstAttribute="leading" secondItem="OmF-D0-8XK" secondAttribute="trailing" constant="8" id="wAp-i1-IoT"/>
+                                </constraints>
+                            </view>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="40" sectionHeaderHeight="8" sectionFooterHeight="8" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c7x-vs-xJb">
+                                <rect key="frame" x="0.0" y="44" width="320" height="476"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                        </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="nPZ-WJ-WzZ" id="0et-B1-sxo"/>
-                            <outlet property="delegate" destination="nPZ-WJ-WzZ" id="qoP-77-lGv"/>
-                        </connections>
-                    </tableView>
+                        <constraints>
+                            <constraint firstItem="c7x-vs-xJb" firstAttribute="top" secondItem="sP7-Dp-Tdt" secondAttribute="bottom" id="1Eo-VP-fTL"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="jgV-q4-hPk" secondAttribute="trailing" constant="-16" id="R42-s1-4rt"/>
+                            <constraint firstItem="c7x-vs-xJb" firstAttribute="leading" secondItem="nk9-lG-t3D" secondAttribute="leading" id="Ygg-NF-iwx"/>
+                            <constraint firstItem="jgV-q4-hPk" firstAttribute="leading" secondItem="nk9-lG-t3D" secondAttribute="leadingMargin" constant="-16" id="d6o-6d-cdw"/>
+                            <constraint firstItem="PDr-bc-lCs" firstAttribute="top" secondItem="jgV-q4-hPk" secondAttribute="bottom" id="pGx-97-pHJ"/>
+                            <constraint firstItem="jgV-q4-hPk" firstAttribute="top" secondItem="c7x-vs-xJb" secondAttribute="bottom" id="qYV-9c-k30"/>
+                            <constraint firstAttribute="trailing" secondItem="c7x-vs-xJb" secondAttribute="trailing" id="xF4-UV-tox"/>
+                        </constraints>
+                    </view>
                     <connections>
-                        <outlet property="tableView" destination="aDP-7H-1w9" id="aZS-Ee-Z0i"/>
+                        <outlet property="inputContainerBottomConstraint" destination="pGx-97-pHJ" id="z8y-eI-npK"/>
+                        <outlet property="inputContainerHeightConstraint" destination="rp1-3P-bOX" id="ktA-ky-kxn"/>
+                        <outlet property="inputContainerView" destination="jgV-q4-hPk" id="ctw-85-x0B"/>
+                        <outlet property="messageTextView" destination="OmF-D0-8XK" id="tx7-L8-Szk"/>
+                        <outlet property="sendButton" destination="lkG-50-sMf" id="Unp-PR-Dg1"/>
+                        <outlet property="tableView" destination="c7x-vs-xJb" id="Zhw-Ac-a3a"/>
                     </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="k85-02-e5i" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5Do-MQ-CS8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3184" y="418"/>
+            <point key="canvasLocation" x="3137" y="330"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="XHW-Hf-Yaw">
@@ -345,7 +399,7 @@
                 <splitViewController storyboardIdentifier="RootVC" useStoryboardIdentifierAsRestorationIdentifier="YES" allowDoubleColumnStyle="YES" id="UM5-Ab-OZB" sceneMemberID="viewController">
                     <connections>
                         <segue destination="8RP-h1-BQm" kind="relationship" relationship="masterViewController" id="cJ9-sO-qpQ"/>
-                        <segue destination="nPZ-WJ-WzZ" kind="relationship" relationship="detailViewController" id="aPc-Fg-hHb"/>
+                        <segue destination="aFH-f5-L3J" kind="relationship" relationship="detailViewController" id="eC9-PO-vHD"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fen-B8-BLY" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -357,6 +411,12 @@
         <image name="gear.png" width="30" height="30"/>
         <image name="paperplane.png" width="30" height="30"/>
         <image name="person.png" width="30" height="30"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="linkColor">
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
