@@ -318,21 +318,22 @@
                                 <rect key="frame" x="0.0" y="520" width="320" height="48"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" scrollEnabled="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="OmF-D0-8XK">
-                                        <rect key="frame" x="16" y="8" width="228" height="32"/>
+                                        <rect key="frame" x="16" y="8" width="216" height="32"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <color key="textColor" systemColor="labelColor"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                     </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lkG-50-sMf">
-                                        <rect key="frame" x="252" y="8" width="60" height="32"/>
+                                        <rect key="frame" x="240" y="8" width="64" height="32"/>
+                                        <color key="backgroundColor" systemColor="linkColor"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="60" id="WPi-DA-imC"/>
+                                            <constraint firstAttribute="width" constant="64" id="WPi-DA-imC"/>
                                         </constraints>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="Send">
                                             <fontDescription key="titleFontDescription" type="system" pointSize="15"/>
-                                            <color key="baseForegroundColor" systemColor="linkColor"/>
+                                            <color key="baseForegroundColor" systemColor="systemBackgroundColor"/>
                                         </buttonConfiguration>
                                     </button>
                                 </subviews>
@@ -340,7 +341,7 @@
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="OmF-D0-8XK" secondAttribute="bottom" constant="8" id="HJS-q9-QIP"/>
                                     <constraint firstItem="OmF-D0-8XK" firstAttribute="top" secondItem="jgV-q4-hPk" secondAttribute="top" constant="8" id="KKd-dn-yxx"/>
-                                    <constraint firstAttribute="trailing" secondItem="lkG-50-sMf" secondAttribute="trailing" constant="8" id="KbA-zN-DM1"/>
+                                    <constraint firstAttribute="trailing" secondItem="lkG-50-sMf" secondAttribute="trailing" constant="16" id="KbA-zN-DM1"/>
                                     <constraint firstItem="OmF-D0-8XK" firstAttribute="leading" secondItem="jgV-q4-hPk" secondAttribute="leading" constant="16" id="MuF-UC-SEp"/>
                                     <constraint firstItem="lkG-50-sMf" firstAttribute="top" secondItem="jgV-q4-hPk" secondAttribute="top" constant="8" id="bfr-IY-dJg"/>
                                     <constraint firstAttribute="bottom" secondItem="lkG-50-sMf" secondAttribute="bottom" constant="8" id="bms-nk-aIx"/>
@@ -348,7 +349,7 @@
                                     <constraint firstItem="lkG-50-sMf" firstAttribute="leading" secondItem="OmF-D0-8XK" secondAttribute="trailing" constant="8" id="wAp-i1-IoT"/>
                                 </constraints>
                             </view>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="40" sectionHeaderHeight="8" sectionFooterHeight="8" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c7x-vs-xJb">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="40" sectionHeaderHeight="200" sectionFooterHeight="200" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c7x-vs-xJb">
                                 <rect key="frame" x="0.0" y="44" width="320" height="476"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>

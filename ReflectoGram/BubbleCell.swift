@@ -65,7 +65,7 @@ class BubbleCell: UITableViewCell {
             avatarImageView.isHidden = true
             let xPos = screenWidth - finalBubbleWidth - 16
             bubbleView.frame = CGRect(x: xPos, y: 8, width: finalBubbleWidth, height: contentView.frame.height - 10)
-            if legacyUI { bubbleView.backgroundColor = UIColor(red: 0.3, green: 0.85, blue: 0.39, alpha: 1.0) }
+            if legacyUI { bubbleView.backgroundColor = UIColor(red: 0.22, green: 0.72, blue: 0.32, alpha: 1.0) }
             else { bubbleView.backgroundColor = UIColor(red: 0.0, green: 0.48, blue: 1.0, alpha: 1.0) }
             timeLabel.textColor = UIColor(white: 1, alpha: 0.85)
             senderNameLabel.isHidden = true

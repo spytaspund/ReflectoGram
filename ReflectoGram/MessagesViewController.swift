@@ -13,6 +13,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
     @IBOutlet weak var sendButton: UIButton!
     @IBOutlet weak var inputContainerBottomConstraint: NSLayoutConstraint!
     @IBOutlet weak var inputContainerHeightConstraint: NSLayoutConstraint!
+    var isSmallScreen: Bool { return UIScreen.main.bounds.height <= 480 }
     let minInputHeight: CGFloat = 48.0
     let maxInputHeight: CGFloat = 120.0
     var keyboardHeight: CGFloat = 0.0
@@ -38,6 +39,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         bgImageView.contentMode = .scaleAspectFill
         tableView.backgroundView = bgImageView
         tableView.backgroundColor = .clear
+        tableView.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+        tableView.scrollIndicatorInsets = tableView.contentInset
         
         messageTextView.delegate = self
         messageTextView.layer.cornerRadius = 6
@@ -47,8 +50,54 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-
+        sendButton.layer.cornerRadius = 6
+        sendButton.titleLabel?.numberOfLines = 1
+        sendButton.titleLabel?.lineBreakMode = .byClipping
+        sendButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        sendButton.titleLabel?.minimumScaleFactor = 0.8
+        
+        if isiOS6() {
+            let containerGradient = CAGradientLayer()
+            containerGradient.name = "inputGradient"
+            containerGradient.colors = [
+                UIColor(white: 0.22, alpha: 1.0).cgColor,
+                UIColor(white: 0.05, alpha: 1.0).cgColor
+            ]
+            let topBorder = CALayer()
+            topBorder.backgroundColor = UIColor(white: 0.4, alpha: 0.8).cgColor
+            topBorder.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 1.0)
+            
+            inputContainerView.layer.insertSublayer(containerGradient, at: 0)
+            inputContainerView.layer.addSublayer(topBorder)
+            
+            let btnGradient = CAGradientLayer()
+            btnGradient.name = "buttonGradient"
+            btnGradient.colors = [
+                UIColor(red: 0.45, green: 0.70, blue: 0.98, alpha: 1.0).cgColor,
+                UIColor(red: 0.12, green: 0.45, blue: 0.88, alpha: 1.0).cgColor
+            ]
+            btnGradient.cornerRadius = 8
+            sendButton.layer.insertSublayer(btnGradient, at: 0)
+            sendButton.layer.borderColor = UIColor(red: 0.0, green: 0.2, blue: 0.5, alpha: 1.0).cgColor
+            sendButton.layer.borderWidth = 1.0
+        }
+        
         self.title = "Chat"
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if let layers = inputContainerView.layer.sublayers {
+            for layer in layers where layer.name == "inputGradient" {
+                layer.frame = inputContainerView.bounds
+            }
+        }
+
+        if let btnLayers = sendButton.layer.sublayers {
+            for layer in btnLayers where layer.name == "buttonGradient" {
+                layer.frame = sendButton.bounds
+            }
+        }
     }
     
     deinit {
@@ -216,17 +265,23 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
             }
         case .file:
             if let fileCell = cell as? FileMessageCell {
-                fileCell.fileIconView.image = UIImage(named: "document")
+                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? "")&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
+                fileCell.fileIconView.setMediaThumb(messageId: message.id, url: url, placeholderName: "document")
                 fileCell.fileNameLabel.text = message.mediaInfo?.title ?? "Document"
-                fileCell.fileMetaLabel.text = ".md"
+                fileCell.fileMetaLabel.text = ".something"
             }
         case .audio:
             if let audioCell = cell as? AudioMessageCell {
+                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? "")&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
+                audioCell.coverImageView.setMediaThumb(messageId: message.id, url: url, placeholderName: "audio")
                 audioCell.captionLabel.text = message.text ?? ""
                 audioCell.titleLabel.text = message.mediaInfo?.title ?? "Untitled"
                 audioCell.performerLabel.text = message.mediaInfo?.performer ?? "Unknown"
-                audioCell.durationLabel.text = "10:09"
-                audioCell.coverImageView.image = UIImage(named: "audio")
+                if let durationInt = message.mediaInfo?.duration {
+                    audioCell.durationLabel.text = DateHelper.shared.formatDuration(durationInt)
+                } else {
+                    audioCell.durationLabel.text = "0:00"
+                }
             }
         }
         return cell
@@ -289,18 +344,30 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
             self.view.layoutIfNeeded()
         }
     }
+    
     func updateInputHeight() {
         let fixedWidth = messageTextView.frame.size.width
-        let newSize = messageTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
-        var newHeight = newSize.height + 12
+        var newHeight: CGFloat = minInputHeight
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        
+        if isiOS6() {
+            newHeight = messageTextView.contentSize.height
+            if isPad { newHeight += 16 }
+        } else {
+            let newSize = messageTextView.sizeThatFits(CGSize(width: fixedWidth, height: 9999.0))
+            newHeight = ceil(newSize.height) + (isPad ? 20 : 16)
+        }
         
         if newHeight < minInputHeight { newHeight = minInputHeight }
-        if newHeight > maxInputHeight {
-            newHeight = maxInputHeight
+        let actualMaxHeight = isPad ? maxInputHeight * 1.5 : maxInputHeight
+        
+        if newHeight > actualMaxHeight {
+            newHeight = actualMaxHeight
             messageTextView.isScrollEnabled = true
         } else {
             messageTextView.isScrollEnabled = false
         }
+        
         if inputContainerHeightConstraint.constant != newHeight {
             inputContainerHeightConstraint.constant = newHeight
             UIView.animate(withDuration: 0.2) {
@@ -322,9 +389,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         APIHelper.shared.sendMessage(text: messageText, chatID: chatID, sessionID: sessionID, serverURL: serverURL, keyHex: cryptoKey) { [weak self] success in
             guard let self = self else { return }
             self.sendButton.isEnabled = true
-            
-            if success { self.loadMessages()}
-            else { print("Failed to send message") }
+            self.loadMessages()
         }
     }
     
@@ -365,7 +430,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
        avatar.clipsToBounds = true
        avatar.isUserInteractionEnabled = false
        label.isUserInteractionEnabled = false
-       //titleView.backgroundColor = UIColor.red.withAlphaComponent(0.1) // debug, pls remove later
        if let chatID = activeChat?.id {
            if let diskImage = CacheHelper.shared.getCachedImage(id: chatID, category: .avatar) {
                avatar.image = diskImage

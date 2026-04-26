@@ -303,6 +303,7 @@ class APIHelper {
             completion(cached)
             return
         }
+        
         if let diskImage = CacheHelper.shared.getCachedImage(id: cacheKey, category: category) {
             imageCache.setObject(diskImage, forKey: nsKey)
             completion(diskImage)
@@ -310,15 +311,20 @@ class APIHelper {
         }
         
         guard let url = URL(string: urlString) else { completion(nil); return }
-        
         NSURLConnection.sendAsynchronousRequest(URLRequest(url: url), queue: .main) { [weak self] response, data, error in
-            if let imageData = data, let image = UIImage(data: imageData) {
+            let httpResponse = response as? HTTPURLResponse
+            if error == nil, let statusCode = httpResponse?.statusCode, statusCode == 200,
+               let imageData = data, let image = UIImage(data: imageData) {
                 CacheHelper.shared.saveImage(image: image, id: cacheKey, category: category)
                 self?.imageCache.setObject(image, forKey: nsKey)
                 completion(image)
-            } else { completion(nil) }
+            } else {
+                if let code = httpResponse?.statusCode { print("Image download failed with code: \(code)") }
+                completion(nil)
+            }
         }
     }
+    
     func sendMessage(text: String, chatID: String, sessionID: String, serverURL: String, keyHex: String, completion: @escaping (Bool) -> Void) {
         let urlString = "\(serverURL)/send_message?chat_id=\(chatID)&session_id=\(sessionID)"
         guard let url = URL(string: urlString) else {
@@ -366,10 +372,14 @@ class APIHelper {
 
 extension UIImageView {
     func setAvatar(id: String, url: String) {
-        self.image = UIImage(named: "reflectogram-person")
+        let placeholder = UIImage(named: "reflectogram-person")
+        self.image = placeholder
         self.accessibilityIdentifier = id
+        
         APIHelper.shared.fetchImage(urlString: url, cacheKey: id, category: .avatar) { [weak self] image in
-            if self?.accessibilityIdentifier == id { self?.image = image }
+            if self?.accessibilityIdentifier == id {
+                self?.image = image ?? placeholder
+            }
         }
     }
     func setMessagePhoto(messageId: String, url: String) {
@@ -407,6 +417,19 @@ extension UIImageView {
         APIHelper.shared.fetchImage(urlString: url, cacheKey: musicId, category: .albumCover) { [weak self] image in
             if self?.accessibilityIdentifier == musicId {
                 self?.image = image ?? UIImage(named: "audio")
+            }
+        }
+    }
+    // maybe it's time to add one universal method? huh? wha?
+    func setMediaThumb(messageId: String, url: String, placeholderName: String) {
+        self.image = UIImage(named: placeholderName)
+        self.accessibilityIdentifier = messageId
+        let cacheKey = "thumb_\(messageId)"
+        
+        APIHelper.shared.fetchImage(urlString: url, cacheKey: cacheKey, category: .thumb) { [weak self] image in
+            if self?.accessibilityIdentifier == messageId {
+                if let downloadedImage = image { self?.image = downloadedImage }
+                else { self?.image = UIImage(named: placeholderName) }
             }
         }
     }
