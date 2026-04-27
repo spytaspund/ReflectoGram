@@ -195,7 +195,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" text="Add your TgBridge server address here. URL should contain &quot;http://&quot; prefix and MUST NOT contain &quot;/&quot; symbol at the end." lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="288" translatesAutoresizingMaskIntoConstraints="NO" id="Dn7-dd-fyI">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" text="Add your TgPrism server address here. URL should contain &quot;http://&quot; prefix and MUST NOT contain &quot;/&quot; symbol at the end." lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="288" translatesAutoresizingMaskIntoConstraints="NO" id="Dn7-dd-fyI">
                                 <rect key="frame" x="16" y="139" width="288" height="85"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="85" id="vkv-g6-qFs"/>
