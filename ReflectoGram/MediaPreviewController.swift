@@ -28,10 +28,6 @@ class MediaPreviewController: UIViewController, UIScrollViewDelegate {
         dTap.numberOfTapsRequired = 2
         scrollView.addGestureRecognizer(dTap)
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(toggleUI))
-        tap.require(toFail: dTap)
-        view.addGestureRecognizer(tap)
-        
         setupContent()
     }
 
@@ -104,14 +100,7 @@ class MediaPreviewController: UIViewController, UIScrollViewDelegate {
             scrollView.zoom(to: zoomRect, animated: true)
         }
     }
-    @objc func toggleUI() {
-        let isHidden = !navBar.isHidden
-        UIView.animate(withDuration: 0.3) {
-            self.navBar.alpha = isHidden ? 0 : 1
-        } completion: { _ in
-            self.navBar.isHidden = isHidden
-        }
-    }
+
     @IBAction func doneTapped(_ sender: Any) {
         if let nav = self.navigationController {
             nav.popViewController(animated: true)

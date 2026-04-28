@@ -35,6 +35,7 @@
 		AC523CB22F97F88900C9F206 /* AboutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC523CB12F97F88900C9F206 /* AboutCell.swift */; };
 		AC7E08E32F93BEA60061A562 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7E08E22F93BEA60061A562 /* AboutViewController.swift */; };
 		AC8561B42F6337160038290A /* MediaPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8561B32F6337160038290A /* MediaPreviewController.swift */; };
+		AC85CB492FA1389800EFEED7 /* reflectogram.png in Resources */ = {isa = PBXBuildFile; fileRef = AC85CB482FA1389800EFEED7 /* reflectogram.png */; };
 		ACAFE00C2F9AA28600236677 /* gear.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0062F9AA28400236677 /* gear.png */; };
 		ACAFE00D2F9AA28600236677 /* paperplane.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0072F9AA28500236677 /* paperplane.png */; };
 		ACAFE00E2F9AA28600236677 /* paperplane@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ACAFE0082F9AA28500236677 /* paperplane@2x.png */; };
@@ -95,6 +96,7 @@
 		AC6502032F96AA7E00236BF8 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		AC7E08E22F93BEA60061A562 /* AboutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		AC8561B32F6337160038290A /* MediaPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewController.swift; sourceTree = "<group>"; };
+		AC85CB482FA1389800EFEED7 /* reflectogram.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reflectogram.png; sourceTree = "<group>"; };
 		ACAFE0062F9AA28400236677 /* gear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear.png; sourceTree = "<group>"; };
 		ACAFE0072F9AA28500236677 /* paperplane.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = paperplane.png; sourceTree = "<group>"; };
 		ACAFE0082F9AA28500236677 /* paperplane@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "paperplane@2x.png"; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				AC2BCEEC2F99573B00C7846E /* phone.png */,
 				AC2BCEF12F99573B00C7846E /* play.png */,
 				AC2BCEEF2F99573B00C7846E /* premium.png */,
+				AC85CB482FA1389800EFEED7 /* reflectogram.png */,
 				30CA68A12F3B818100E64CCF /* CacheHelper.swift */,
 				30CA68A52F3BB23900E64CCF /* DateHelper.swift */,
 				3024CE4E2F40EC0A00D23D9D /* Launch Screen.storyboard */,
@@ -315,6 +318,7 @@
 			files = (
 				305D214C2F37C23E00893C2B /* Assets.xcassets in Resources */,
 				ACAFE00E2F9AA28600236677 /* paperplane@2x.png in Resources */,
+				AC85CB492FA1389800EFEED7 /* reflectogram.png in Resources */,
 				AC2BCEFB2F99573C00C7846E /* play.png in Resources */,
 				ACAFE00F2F9AA28600236677 /* gear@2x.png in Resources */,
 				ACAFE0102F9AA28600236677 /* person.png in Resources */,
