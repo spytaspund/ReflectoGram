@@ -30,15 +30,11 @@ class AboutViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // need to fix it cuz it covers nav and tab bar
-        /*if isiOS6() {
-            self.tableView.backgroundView = nil
-            self.tableView.backgroundColor = UIColor(patternImage: UIImage(named: "reflectogram-background") ?? UIImage())
-        }*/
         let doneButton = UIBarButtonItem(title: "Back", style: .done, target: self, action: #selector(dismissProfile))
         self.navigationItem.rightBarButtonItem = doneButton
         
-        userID = cachedChat?.id ?? "me"
+        if let id = cachedChat?.id { userID = String(id) }
+        else { userID = "me" }
         self.tableView.register(ProfileMainCell.self, forCellReuseIdentifier: "MainCell")
         self.tableView.register(MusicProfileCell.self, forCellReuseIdentifier: "MusicCell")
         self.tableView.register(ChannelProfileCell.self, forCellReuseIdentifier: "ChannelCell")
@@ -80,7 +76,7 @@ class AboutViewController: UITableViewController {
         
         var mediaSection: [ProfileRow] = []
         if let channel = chat?.profileChannel {
-            mediaSection.append(.channel(name: channel.title, channelID: channel.id, lastPost: channel.last_post, subsCount: channel.subs_count))
+            mediaSection.append(.channel(name: channel.title, channelID: channel.id, lastPost: channel.lastPost?.text ?? "[Media]", subsCount: channel.subsCount))
         }
         if let music = chat?.profileMusic, !music.isEmpty {
             for track in music {
@@ -126,18 +122,19 @@ class AboutViewController: UITableViewController {
         case 2: return "last seen within a week"
         case 3: return "last seen within a month"
         case 4:
-            guard let timestamp = status.seenOnline, timestamp > 0 else { return "offline" }
-            let date = Date(timeIntervalSince1970: timestamp)
-            let formatter = DateFormatter()
-            formatter.dateFormat = "dd.MM.yy 'at' HH:mm"
-            return "last seen \(formatter.string(from: date))"
+            let timestamp = status.seenOnline
+            if timestamp > 0 {
+                let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
+                let formatter = DateFormatter()
+                formatter.dateFormat = "dd.MM.yy 'at' HH:mm"
+                return "last seen \(formatter.string(from: date))"
+            }
         default: return "offline"
         }
+        return "offline"
     }
     
     func loadProfileData() {
-        let userID = cachedChat?.id ?? "me"
-        
         if let cachedAbout = CacheHelper.shared.getCachedAbout(forUserID: userID) {
             self.fullChat = cachedAbout
             self.buildTableData()
@@ -149,7 +146,7 @@ class AboutViewController: UITableViewController {
             switch result {
             case .success(let chat):
                 self.fullChat = chat
-                CacheHelper.shared.saveAbout(chat, forUserID: userID)
+                CacheHelper.shared.saveAbout(chat, forUserID: self.userID)
                 
                 self.setTitle(name: self.fullChat?.name ?? "User")
                 self.buildTableData()
@@ -188,7 +185,7 @@ class AboutViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        //if section == 0 { return 0.0 }
+        if section == 0 { return 0.0 }
         if let title = self.tableView(tableView, titleForHeaderInSection: section), !title.isEmpty { return 29.0 }
         return 0.0
     }
@@ -200,28 +197,31 @@ class AboutViewController: UITableViewController {
         switch rowType {
         case .main(let status, let isPremium, let chatType):
             let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell", for: indexPath) as! ProfileMainCell
+            let url = "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)"
             cell.delegate = self
             cell.nameLabel.text = chat?.name ?? "User"
             cell.statusLabel.text = status
             cell.statusLabel.textColor = (status == "online") ? .blue : .gray
             cell.setupButtons(for: chatType)
             cell.setPremium(isPremium)
-            cell.avatarImageView.setAvatar(id: userID, url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(userID)")
+            cell.avatarImageView.setRemoteImage(url: url, cacheKey: "avatar_\(userID)", placeholder: "reflectogram-person")
             return cell
             
         case .music(let musicID, let userID, let title, let artist):
             let cell = tableView.dequeueReusableCell(withIdentifier: "MusicCell", for: indexPath) as! MusicProfileCell
-            cell.coverImageView.setTrackCover(musicId: musicID, userId: userID, serverURL: self.serverURL, sessionID: self.sessionID)
+            let url = "\(serverURL)/get_media?session_id=\(sessionID)&music_id=\(musicID)&user_id=\(userID)&thumb"
+            cell.coverImageView.setRemoteImage(url: url, cacheKey: "cover_\(musicID)", placeholder: "audio")
             cell.titleLabel.text = title
             cell.artistAlbumLabel.text = artist
             return cell
             
         case .channel(let name, let channelID, let lastPost, let subsCount):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ChannelCell", for: indexPath) as! ChannelProfileCell
+            let url = "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(channelID)"
             cell.nameLabel.text = name
             cell.subLabel.text = "\(subsCount) subscribers"
             cell.lastMessageLabel.text = lastPost
-            cell.avatarImageView.setAvatar(id: "\(channelID)", url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(channelID)")
+            cell.avatarImageView.setRemoteImage(url: url, cacheKey: "avatar_\(userID)", placeholder: "reflectogram-person")
             return cell
             
         case .phone:
@@ -292,7 +292,6 @@ extension AboutViewController: ProfileMainCellDelegate {
         self.dismiss(animated: true) {
             var targetNav: UINavigationController?
             if let splitVC = presentingVC as? UISplitViewController {
-
                 targetNav = splitVC.viewControllers.last as? UINavigationController
             }
             else if let tab = presentingVC as? UITabBarController {

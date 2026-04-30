@@ -44,34 +44,8 @@ class MediaPreviewController: UIViewController, UIScrollViewDelegate {
         s.startAnimating()
         self.spinner = s
         
-        let fullCacheKey = "full_\(mediaID)"
-        if let diskImage = CacheHelper.shared.getCachedImage(id: fullCacheKey, category: .full) {
-            self.imageView.image = diskImage
-            self.imageView.backgroundColor = .clear
-            self.stopSpinner()
-            return
-        }
-        
-        APIHelper.shared.fetchImage(urlString: mediaURL, cacheKey: fullCacheKey, category: .full) { [weak self] image in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.stopSpinner()
-                
-                if let img = image {
-                    self.imageView.image = img
-                    self.imageView.translatesAutoresizingMaskIntoConstraints = true
-                    let screen = UIScreen.main.bounds
-                    self.imageView.frame = CGRect(x: 0, y: 0, width: screen.width, height: screen.height)
-                    self.scrollView.contentSize = self.imageView.frame.size
-                    self.scrollView.zoomScale = 1.0
-                    self.scrollViewDidZoom(self.scrollView)
-                    self.imageView.backgroundColor = .clear
-                } else {
-                    self.imageView.backgroundColor = .black
-                    // place for error msg
-                }
-            }
-        }
+        self.imageView.setRemoteImage(url: mediaURL, cacheKey: "full_\(mediaID)", placeholder: "placeholder")
+        stopSpinner()
     }
 
     private func stopSpinner() {

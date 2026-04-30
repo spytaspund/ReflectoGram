@@ -48,13 +48,13 @@ class CacheHelper {
         switch category {
         case .avatar:
             folder = avatarsPath
-            fileName = "\(id).png"
+            fileName = "avatar_\(id).png"
         case .thumb:
             folder = thumbPath
-            fileName = "\(id).png"
+            fileName = "thumb_\(id).png"
         case .full:
             folder = fullPath
-            fileName = "\(id).png"
+            fileName = "full_\(id).png"
         case .messages:
             folder = messagesPath
             fileName = "msg_\(id).json"

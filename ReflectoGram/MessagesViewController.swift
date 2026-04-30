@@ -112,9 +112,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         self.cryptoKey = defaults.string(forKey: "aesKey") ?? ""
 
         if serverURL.isEmpty {
-            if let loginVC = self.storyboard?.instantiateViewController(withIdentifier: "LoginVC") {
-                self.present(loginVC, animated: true, completion: nil)
-            }
+            return
         } else {
             setupTitleView(name: activeChat?.name ?? "Chat")
             loadMessages()
@@ -123,7 +121,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
 
     func loadMessages() {
         guard let chatID = activeChat?.id else { return }
-        if let cached = CacheHelper.shared.getCachedMessages(forChatID: chatID) {
+        if let cached = CacheHelper.shared.getCachedMessages(forChatID: "\(chatID)") {
             self.messages = Array(cached.reversed())
             self.tableView.reloadData()
             self.scrollToBottom()
@@ -139,7 +137,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
                 
                 switch result {
                 case .success(let loadedMessages):
-                    CacheHelper.shared.saveMessages(loadedMessages, forChatID: chatID)
+                    CacheHelper.shared.saveMessages(loadedMessages, forChatID: "\(chatID)")
                     
                     self.messages = Array(loadedMessages.reversed())
                     if let tv = self.tableView { tv.reloadData() }
@@ -167,7 +165,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         let message = messages[indexPath.row]
         let isGroup = !(activeChat?.type == "user" || activeChat?.type == "channel")
         let isIncoming = !message.isOutgoing
-        let text = message.text ?? ""
+        let text = message.text
         
         let screenWidth = tableView.frame.width
         let maxBubbleWidth = screenWidth * 0.75
@@ -179,14 +177,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         let bottomPadding: CGFloat = 10
 
         switch message.type {
-        case .text:
-            let textMaxWidth = maxBubbleWidth - 20 - 45
-            let font = UIFont.systemFont(ofSize: 15)
-            let textSize = LayoutHelper.sizeForText(text, font: font, maxWidth: textMaxWidth)
-            
-            bubbleHeight = max(textSize.height + nameHeight + 20, nameHeight + 35)
-            
-        case .image:
+        case "photo":
             let photoRatio: CGFloat = 0.6
             let photoHeight = maxBubbleWidth * photoRatio
             
@@ -198,10 +189,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
                 bubbleHeight = photoHeight + nameHeight + 8
             }
             
-        case .sticker:
+        case "sticker":
             bubbleHeight = 160
             
-        case .audio, .file:
+        case "audio", "file":
             let baseHeight: CGFloat = 45 + 16
             if !text.isEmpty {
                 let capFont = UIFont.systemFont(ofSize: 15)
@@ -210,6 +201,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
             } else {
                 bubbleHeight = baseHeight + nameHeight + 10
             }
+        default: // text
+            let textMaxWidth = maxBubbleWidth - 20 - 45
+            let font = UIFont.systemFont(ofSize: 15)
+            let textSize = LayoutHelper.sizeForText(text, font: font, maxWidth: textMaxWidth)
+            
+            bubbleHeight = max(textSize.height + nameHeight + 20, nameHeight + 35)
         }
         
         if isIncoming && isGroup {
@@ -227,11 +224,11 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         
         let identifier: String
         switch message.type {
-        case .text:    identifier = "TextMessageCell"
-        case .image:   identifier = "ImageMessageCell"
-        case .sticker: identifier = "StickerMessageCell"
-        case .file:    identifier = "FileMessageCell"
-        case .audio:   identifier = "AudioMessageCell"
+        case "photo":   identifier = "ImageMessageCell"
+        case "sticker": identifier = "StickerMessageCell"
+        case "file":    identifier = "FileMessageCell"
+        case "audio":   identifier = "AudioMessageCell"
+        default:        identifier = "TextMessageCell"
         }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as! BubbleCell
@@ -241,40 +238,37 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         cell.setupBaseUI()
 
         cell.senderNameLabel.text = message.sender
-        cell.timeLabel.text = DateHelper.shared.formatDateMessage(message.date ?? "")
+        cell.timeLabel.text = DateHelper.shared.formatDateMessage(message.date)
         
         if !message.isOutgoing && isGroup {
-            cell.avatarImageView.setAvatar(id: message.senderID, url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(message.senderID)")
+            let avatarUrl = "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(message.senderId)&size=35"
+            cell.avatarImageView.setRemoteImage(url: avatarUrl, cacheKey: "avatar_\(message.senderId)", placeholder: "reflectogram-person")
         }
 
         switch message.type {
-        case .text:
-            if let textCell = cell as? TextMessageCell {
-                textCell.messageLabel.text = message.text
-            }
-        case .image:
+        case "photo":
             if let imgCell = cell as? ImageMessageCell {
-                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? "")&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
-                imgCell.photoView.setMessagePhoto(messageId: message.id, url: url)
+                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? 0)&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
+                imgCell.photoView.setRemoteImage(url: url, cacheKey: "thumb_\(message.id)", placeholder: "placeholder")
                 imgCell.captionLabel.text = message.text
             }
-        case .sticker:
+        case "sticker":
             if let stickCell = cell as? StickerMessageCell {
-                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? "")&message_id=\(message.id)&token=\(message.mediaToken ?? "")"
-                stickCell.stickerImageView.setMessagePhoto(messageId: message.id, url: url)
+                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? 0)&message_id=\(message.id)&token=\(message.mediaToken ?? "")"
+                stickCell.stickerImageView.setRemoteImage(url: url, cacheKey: "sticker_\(message.id)", placeholder: "placeholder")
             }
-        case .file:
+        case "file":
             if let fileCell = cell as? FileMessageCell {
-                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? "")&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
-                fileCell.fileIconView.setMediaThumb(messageId: message.id, url: url, placeholderName: "document")
+                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? 0)&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
+                fileCell.fileIconView.setRemoteImage(url: url, cacheKey: "thumb_\(message.id)", placeholder: "placeholder")
                 fileCell.fileNameLabel.text = message.mediaInfo?.title ?? "Document"
                 fileCell.fileMetaLabel.text = ".something"
             }
-        case .audio:
+        case "audio":
             if let audioCell = cell as? AudioMessageCell {
-                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? "")&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
-                audioCell.coverImageView.setMediaThumb(messageId: message.id, url: url, placeholderName: "audio")
-                audioCell.captionLabel.text = message.text ?? ""
+                let url = "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(activeChat?.id ?? 0)&message_id=\(message.id)&token=\(message.mediaToken ?? "")&thumb"
+                audioCell.coverImageView.setRemoteImage(url: url, cacheKey: "thumb_\(message.id)", placeholder: "placeholder")
+                audioCell.captionLabel.text = message.text
                 audioCell.titleLabel.text = message.mediaInfo?.title ?? "Untitled"
                 audioCell.performerLabel.text = message.mediaInfo?.performer ?? "Unknown"
                 if let durationInt = message.mediaInfo?.duration {
@@ -283,6 +277,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
                     audioCell.durationLabel.text = "0:00"
                 }
             }
+        default:
+            if let textCell = cell as? TextMessageCell {
+                textCell.messageLabel.text = message.text
+            }
         }
         return cell
     }
@@ -290,7 +288,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let message = messages[indexPath.row]
         if let cell = tableView.cellForRow(at: indexPath) as? BubbleCell {
-            if message.type != .text {
+            if message.type != "text" {
                 self.didTapMedia(in: cell, message: message)
             }
         }
@@ -299,9 +297,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
     func didTapMedia(in cell: BubbleCell, message: Message) {
         guard let token = message.mediaToken, let chatID = activeChat?.id else { return }
         if let previewVC = self.storyboard?.instantiateViewController(withIdentifier: "MediaPreviewVC") as? MediaPreviewController {
-            previewVC.mediaID = message.id
+            previewVC.mediaID = "\(message.id)"
             let urlString = "\(serverURL)/get_media?session_id=\(sessionID)&token=\(token)&message_id=\(message.id)&chat_id=\(chatID)"
-            
             previewVC.mediaURL = urlString
             previewVC.modalPresentationStyle = .fullScreen
             self.present(previewVC, animated: true, completion: nil)
@@ -386,7 +383,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         updateInputHeight()
         sendButton.isEnabled = false
         
-        APIHelper.shared.sendMessage(text: messageText, chatID: chatID, sessionID: sessionID, serverURL: serverURL, keyHex: cryptoKey) { [weak self] success in
+        APIHelper.shared.sendMessage(text: messageText, chatID: "\(chatID)", sessionID: sessionID, serverURL: serverURL, keyHex: cryptoKey) { [weak self] success in
             guard let self = self else { return }
             self.sendButton.isEnabled = true
             self.loadMessages()
@@ -430,15 +427,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
        avatar.clipsToBounds = true
        avatar.isUserInteractionEnabled = false
        label.isUserInteractionEnabled = false
-       if let chatID = activeChat?.id {
-           if let diskImage = CacheHelper.shared.getCachedImage(id: chatID, category: .avatar) {
-               avatar.image = diskImage
-           }
-           else {
-               avatar.image = UIImage(named: "reflectogram-group")
-           }
-       }
-       
+       avatar.setRemoteImage(url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(activeChat?.id ?? 0)&size=70", cacheKey: "avatar_\(activeChat?.id ?? 0)", placeholder: "reflectogram-group")
        titleView.addSubview(avatar)
        titleView.addSubview(label)
        titleView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]
@@ -450,7 +439,7 @@ extension MessagesViewController: BubbleCellDelegate {
     func didTapAvatar(in cell: BubbleCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         let message = messages[indexPath.row]
-        let tempChat = Chat(id: message.senderID, name: message.sender)
+        let tempChat = Chat(id: message.senderId, name: message.sender)
         if let previewVC = self.storyboard?.instantiateViewController(withIdentifier: "AboutViewController") as? AboutViewController {
             previewVC.cachedChat = tempChat
             let nav = UINavigationController(rootViewController: previewVC)

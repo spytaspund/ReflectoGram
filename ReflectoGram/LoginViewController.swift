@@ -46,10 +46,10 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
 
     func setupButtonStyle() {
+        connectButton.setTitleColor(.white, for: .normal)
         if self.view.responds(to: #selector(getter: UIView.tintColor)) {
             // iOS 7+
             connectButton.backgroundColor = self.view.tintColor
-            connectButton.setTitleColor(.white, for: .normal)
             connectButton.layer.cornerRadius = 8
             buttonGradient?.removeFromSuperlayer()
         } else {
@@ -64,7 +64,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 buttonGradient?.borderColor = UIColor.darkGray.cgColor
                 buttonGradient?.borderWidth = 1
                 connectButton.layer.insertSublayer(buttonGradient!, at: 0)
-                connectButton.setTitleColor(.black, for: .normal)
             }
             buttonGradient?.frame = connectButton.bounds
         }
@@ -196,7 +195,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 self.isReadyToExit = true
                 self.connectButton.setTitle("Exit", for: .normal)
                 self.connectButton.isEnabled = true
-                //self.animateSuccessUI()
             } else {
                 self.handleFailure()
             }
@@ -212,27 +210,4 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             self.connectButton.setTitle("Retry", for: .normal)
         }
     }
-    
-    // need to implement that later, pretty cool feature
-    /*func animateSuccessUI() {
-        isReadyToExit = true
-        if let widthConst = buttonWidthConstraint {
-            connectButton.removeConstraint(widthConst)
-        }
-        
-        self.buttonLeadingConstraint.constant = 20
-        self.buttonTrailingConstraint.constant = 20
-        
-        UIView.animate(withDuration: 0.6, delay: 0, options: .curveEaseInOut, animations: {
-            self.serverAddressField.alpha = 0.0
-            
-            self.view.layoutIfNeeded()
-            self.buttonGradient?.frame = self.connectButton.bounds
-            
-        }, completion: { _ in
-            self.connectButton.setTitle("Exit", for: .normal)
-            self.connectButton.isEnabled = true
-            self.serverAddressField.isHidden = true
-        })
-    }*/
 }

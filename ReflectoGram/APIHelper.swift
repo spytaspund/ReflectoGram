@@ -8,28 +8,9 @@
 import Foundation
 import UIKit
 
-struct TgPrismData: Codable {
-    let id: Int
-    let message: String
-    let sender: String
-}
-
 struct SeenOnline: Codable {
     let type: Int
-    let seenOnline: TimeInterval?
-    
-    enum CodingKeys: String, CodingKey {
-        case type
-        case seenOnline = "seen_online"
-    }
-}
-
-struct ProfileChannel: Codable {
-    let id: Int64
-    let title: String
-    let username: String?
-    let subs_count: Int
-    let last_post: String
+    let seenOnline: Int
 }
 
 struct ProfileMusic: Codable {
@@ -43,75 +24,71 @@ struct ChatMember: Codable {
     let id: Int64
     let name: String
     let lastSeen: SeenOnline?
-    
-    enum CodingKeys: String, CodingKey {
-        case id, name
-        case lastSeen = "last_seen"
-    }
+}
+
+struct MediaInfo: Codable {
+    let hasThumb: Bool?
+    let fileName: String?
+    let mimeType: String?
+    let size: Int?
+    let emoji: String?
+    let isAnimated: Bool?
+    let isVideo: Bool?
+    let duration: Int?
+    let title: String?
+    let performer: String?
+}
+
+struct Message: Codable {
+    let id: Int
+    let sender: String
+    let senderId: Int64
+    let text: String
+    let date: String
+    let isOutgoing: Bool
+    let type: String
+    let mediaToken: String?
+    let hasMedia: Bool
+    let mediaInfo: MediaInfo?
+}
+
+struct ProfileChannel: Codable {
+    let id: Int64
+    let title: String
+    let username: String?
+    let subsCount: Int
+    let lastPost: Message?
 }
 
 struct Chat: Codable {
-    let id: String
+    let id: Int64
     let name: String
-    let date: String
-    let lastMessage: String
     let type: String
+    let date: String?
+    let lastMessage: Message?
+    let unreadCount: Int?
     
     let username: String?
     let bio: String?
     let phone: String?
-    let isPremium: Bool
-    let participantsCount: Int?
-    
+    let isPremium: Bool?
     let seenOnline: SeenOnline?
     let profileChannel: ProfileChannel?
     let profileMusic: [ProfileMusic]?
     let members: [ChatMember]?
-
-    enum CodingKeys: String, CodingKey {
-        case id, name, date, lastMessage, type, username, bio, phone
-        case isPremium = "is_premium"
-        case participantsCount = "participants_count"
-        case seenOnline = "seen_online"
-        case profileChannel = "profile_channel"
-        case profileMusic = "profile_music"
-        case members
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        if let intID = try? container.decode(Int64.self, forKey: .id) { self.id = String(intID) }
-        else if let strID = try? container.decode(String.self, forKey: .id) { self.id = strID }
-        else { self.id = "0" }
-
-        self.name = (try? container.decode(String.self, forKey: .name)) ?? "Неизвестно"
-        self.date = (try? container.decode(String.self, forKey: .date)) ?? ""
-        self.lastMessage = (try? container.decode(String.self, forKey: .lastMessage)) ?? ""
-        self.type = (try? container.decode(String.self, forKey: .type)) ?? "private"
-
-        self.username = try? container.decode(String.self, forKey: .username)
-        self.bio = try? container.decode(String.self, forKey: .bio)
-        self.phone = try? container.decode(String.self, forKey: .phone)
-        self.isPremium = (try? container.decode(Bool.self, forKey: .isPremium)) ?? false
-        self.participantsCount = try? container.decode(Int.self, forKey: .participantsCount)
-        
-        self.seenOnline = try? container.decode(SeenOnline.self, forKey: .seenOnline)
-        self.profileChannel = try? container.decode(ProfileChannel.self, forKey: .profileChannel)
-        self.profileMusic = try? container.decode([ProfileMusic].self, forKey: .profileMusic)
-        self.members = try? container.decode([ChatMember].self, forKey: .members)
-    }
     
-    init(id: String, name: String, type: String = "user") {
+    // for MessagesVC
+    init(id: Int64, name: String) {
         self.id = id
         self.name = name
-        self.type = type
-        self.date = ""
-        self.lastMessage = ""
+        self.type = "user"
+        self.date = nil
+        self.lastMessage = nil
+        self.unreadCount = nil
         self.username = nil
         self.bio = nil
         self.phone = nil
-        self.isPremium = false
-        self.participantsCount = nil
+        self.isPremium = nil
         self.seenOnline = nil
         self.profileChannel = nil
         self.profileMusic = nil
@@ -123,95 +100,21 @@ struct ChatsResponseContainer: Codable {
     let chats: [Chat]
 }
 
-enum MessageType: String, Codable {
-    case text = "text"
-    case image = "photo"
-    case sticker = "sticker"
-    case file = "file"
-    case audio = "audio"
-}
-
-struct MediaInfo: Codable {
-    let has_thumb: Bool?
-    let emoji: String?
-    let is_animated: Bool?
-    let is_video: Bool?
-    let duration: Int?
-    let title: String?
-    let performer: String?
-    let question: String?
-}
-
-struct Message: Codable {
-    let id: String
-    let text: String?
-    let date: String?
-    let isOutgoing: Bool
-    let type: MessageType
-    let sender: String
-    let senderID: String
-    let mediaInfo: MediaInfo?
-    let mediaToken: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case text
-        case date
-        case isOutgoing = "is_outgoing"
-        case type
-        case sender
-        case senderID = "senderID"
-        case mediaInfo = "media_info"
-        case mediaToken = "mediaToken"
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let typeString = (try? container.decode(String.self, forKey: .type)) ?? "text"
-        if let intID = try? container.decode(Int64.self, forKey: .id) {
-            self.id = String(intID)
-        } else {
-            self.id = try container.decode(String.self, forKey: .id)
-        }
-
-        self.text = try? container.decode(String.self, forKey: .text)
-        self.date = try? container.decode(String.self, forKey: .date)
-        self.isOutgoing = (try? container.decode(Bool.self, forKey: .isOutgoing)) ?? false
-        self.type = MessageType(rawValue: typeString) ?? .text
-        self.sender = (try? container.decode(String.self, forKey: .sender)) ?? "Unknown"
-
-        if let intSenderID = try? container.decode(Int64.self, forKey: .senderID) {
-            self.senderID = String(intSenderID)
-        } else {
-            self.senderID = (try? container.decode(String.self, forKey: .senderID)) ?? "0"
-        }
-
-        self.mediaInfo = try? container.decode(MediaInfo.self, forKey: .mediaInfo)
-        self.mediaToken = try? container.decode(String.self, forKey: .mediaToken)
-    }
-    // for testing purposes
-    init(id: String, text: String?, date: String?, isOutgoing: Bool, type: MessageType, sender: String, senderID: String, mediaInfo: MediaInfo?, mediaToken: String?) {
-        self.id = id
-        self.text = text
-        self.date = date
-        self.isOutgoing = isOutgoing
-        self.type = type
-        self.sender = sender
-        self.senderID = senderID
-        self.mediaInfo = mediaInfo
-        self.mediaToken = mediaToken
-    }
-}
-
 struct MessagesResponseContainer: Codable {
-    let messages: [Message]?
+    let messages: [Message]
 }
 
 struct SendMessageResponse: Codable {
     let status: String
-    let id: String?
+    let id: Int?
     let date: String?
-    let reason: String?
+    let error: String?
+}
+
+enum ImageCategory {
+    case avatar
+    case thumb
+    case albumCover
 }
 
 extension Data {
@@ -235,8 +138,16 @@ extension Data {
 class APIHelper {
     static let shared = APIHelper()
     private let imageCache = NSCache<NSString, UIImage>()
-    private init() { imageCache.countLimit = 50 }
     
+    private let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        // uncomment if snake case somehow sneaks in
+        // decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
+
+    private init() { imageCache.countLimit = 50 }
+
     private func fetchAndDecode<T: Decodable>(urlString: String, keyHex: String, completion: @escaping (Result<T, Error>) -> Void) {
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "API", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -263,40 +174,25 @@ class APIHelper {
             }
         }
     }
+
     func fetchChats(from urlString: String, key: String, completion: @escaping (Result<[Chat], Error>) -> Void) {
         fetchAndDecode(urlString: urlString, keyHex: key) { (result: Result<ChatsResponseContainer, Error>) in
             switch result {
-            case .success(let container):
-                completion(.success(container.chats))
-            case .failure(let error):
-                completion(.failure(error))
+            case .success(let container): completion(.success(container.chats))
+            case .failure(let error): completion(.failure(error))
             }
         }
     }
-    
-    func fetchAbout(from urlString: String, key: String, completion: @escaping (Result<Chat, Error>) -> Void) {
-        fetchAndDecode(urlString: urlString, keyHex: key) { (result: Result<Chat, Error>) in
-            completion(result)
-        }
-    }
-    
+
     func fetchMessages(from urlString: String, key: String, completion: @escaping (Result<[Message], Error>) -> Void) {
         fetchAndDecode(urlString: urlString, keyHex: key) { (result: Result<MessagesResponseContainer, Error>) in
             switch result {
-            case .success(let container):
-                if let messages = container.messages {
-                    print("Success! Messages count: \(messages.count)")
-                    completion(.success(messages))
-                } else {
-                    let error = NSError(domain: "API", code: 404, userInfo: [NSLocalizedDescriptionKey: "'messages' is empty"])
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                completion(.failure(error))
+            case .success(let container): completion(.success(container.messages))
+            case .failure(let error): completion(.failure(error))
             }
         }
     }
-    
+
     func fetchImage(urlString: String, cacheKey: String, category: CacheCategory, completion: @escaping (UIImage?) -> Void) {
         let nsKey = NSString(string: cacheKey)
         if let cached = imageCache.object(forKey: nsKey) {
@@ -325,23 +221,19 @@ class APIHelper {
         }
     }
     
-    func sendMessage(text: String, chatID: String, sessionID: String, serverURL: String, keyHex: String, completion: @escaping (Bool) -> Void) {
-        let urlString = "\(serverURL)/send_message?chat_id=\(chatID)&session_id=\(sessionID)"
-        guard let url = URL(string: urlString) else {
-            completion(false)
-            return
+    func fetchAbout(from urlString: String, key: String, completion: @escaping (Result<Chat, Error>) -> Void) {
+        fetchAndDecode(urlString: urlString, keyHex: key) { (result: Result<Chat, Error>) in
+            completion(result)
         }
+    }
+    
+    func sendMessage(text: String, chatID: String, sessionID: String, serverURL: String, keyHex: String, completion: @escaping (Result<SendMessageResponse, Error>) -> Void) {
+        let urlString = "\(serverURL)/send_message?chat_id=\(chatID)&session_id=\(sessionID)"
+        guard let url = URL(string: urlString) else { return }
         
         let payload = ["text": text]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-            completion(false)
-            return
-        }
-        
-        guard let encryptedData = try? CryptoService.encrypt(data: jsonData, keyHex: keyHex) else {
-            completion(false)
-            return
-        }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+              let encryptedData = try? CryptoService.encrypt(data: jsonData, keyHex: keyHex) else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -349,87 +241,52 @@ class APIHelper {
         request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
         
         NSURLConnection.sendAsynchronousRequest(request, queue: .main) { response, data, error in
-            if error != nil {
-                completion(false)
+            if let error = error {
+                completion(.failure(error))
                 return
             }
-            guard let responseData = data else {
-                completion(false)
+            
+            guard let encryptedData = data else {
+                completion(.failure(NSError(domain: "API", code: 204, userInfo: [NSLocalizedDescriptionKey: "No data"])))
                 return
             }
             
             do {
-                let decrypted = try CryptoService.decrypt(data: responseData, keyHex: keyHex)
-                let result = try JSONDecoder().decode(SendMessageResponse.self, from: decrypted)
-                completion(result.status == "ok")
+                let decryptedData = try CryptoService.decrypt(data: encryptedData, keyHex: keyHex)
+                let responseObj = try self.decoder.decode(SendMessageResponse.self, from: decryptedData)
+                completion(.success(responseObj))
             } catch {
-                print("Send message decryption/decode error: \(error)")
-                completion(false)
+                completion(.failure(error))
             }
         }
     }
 }
 
 extension UIImageView {
-    func setAvatar(id: String, url: String) {
-        let placeholder = UIImage(named: "reflectogram-person")
-        self.image = placeholder
-        self.accessibilityIdentifier = id
-        
-        APIHelper.shared.fetchImage(urlString: url, cacheKey: id, category: .avatar) { [weak self] image in
-            if self?.accessibilityIdentifier == id {
-                self?.image = image ?? placeholder
+    func setRemoteImage(url: String, cacheKey: String, placeholder: String, useSpinner: Bool = false) {
+        self.image = UIImage(named: placeholder)
+        self.accessibilityIdentifier = cacheKey
+        let spinnerTag = 999
+        if useSpinner {
+            if self.viewWithTag(spinnerTag) == nil {
+                let s = UIActivityIndicatorView(style: .gray)
+                s.tag = spinnerTag
+                s.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
+                s.startAnimating()
+                self.addSubview(s)
             }
         }
-    }
-    func setMessagePhoto(messageId: String, url: String) {
-        self.image = nil
-        self.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
-        self.accessibilityIdentifier = messageId
-        var spinner = self.viewWithTag(999) as? UIActivityIndicatorView
-        if spinner == nil {
-            spinner = UIActivityIndicatorView(style: .gray)
-            spinner?.tag = 999
-            spinner?.hidesWhenStopped = true
-            spinner?.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
-            spinner?.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
-            if let spinner = spinner {
-                self.addSubview(spinner)
-            }
-        }
-        
-        spinner?.startAnimating()
-        let cacheKey = "msg_\(messageId)"
-        APIHelper.shared.fetchImage(urlString: url, cacheKey: cacheKey, category: .thumb) { [weak self] image in
-            if self?.accessibilityIdentifier == messageId {
-                self?.backgroundColor = .clear
-                self?.viewWithTag(999)?.removeFromSuperview()
-                self?.image = image
-            }
-        }
-    }
-    func setTrackCover(musicId: String, userId: String, serverURL: String, sessionID: String) {
-        self.image = UIImage(named: "audio")
-        self.accessibilityIdentifier = musicId
-        
-        let url = "\(serverURL)/get_media?session_id=\(sessionID)&music_id=\(musicId)&user_id=\(userId)&thumb"
-        
-        APIHelper.shared.fetchImage(urlString: url, cacheKey: musicId, category: .albumCover) { [weak self] image in
-            if self?.accessibilityIdentifier == musicId {
-                self?.image = image ?? UIImage(named: "audio")
-            }
-        }
-    }
-    // maybe it's time to add one universal method? huh? wha?
-    func setMediaThumb(messageId: String, url: String, placeholderName: String) {
-        self.image = UIImage(named: placeholderName)
-        self.accessibilityIdentifier = messageId
-        let cacheKey = "thumb_\(messageId)"
-        
-        APIHelper.shared.fetchImage(urlString: url, cacheKey: cacheKey, category: .thumb) { [weak self] image in
-            if self?.accessibilityIdentifier == messageId {
-                if let downloadedImage = image { self?.image = downloadedImage }
-                else { self?.image = UIImage(named: placeholderName) }
+
+        var category: CacheCategory = .full
+        if cacheKey.hasPrefix("avatar") { category = .avatar }
+        else if cacheKey.hasPrefix("thumb") { category = .thumb }
+        else if cacheKey.hasPrefix("cover") || cacheKey.hasPrefix("audio") { category = .albumCover }
+
+        APIHelper.shared.fetchImage(urlString: url, cacheKey: cacheKey, category: category) { [weak self] downloadedImage in
+            guard self?.accessibilityIdentifier == cacheKey else { return }
+            if useSpinner { self?.viewWithTag(spinnerTag)?.removeFromSuperview() }
+            if let img = downloadedImage {
+                self?.image = img
             }
         }
     }

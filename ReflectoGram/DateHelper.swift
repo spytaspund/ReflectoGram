@@ -13,7 +13,14 @@ class DateHelper {
     private let serverFormatter: DateFormatter = {
         let df = DateFormatter()
         df.locale = Locale(identifier: "en_US_POSIX")
-        df.dateFormat = "yyyy-MM-dd HH:mm:ssZZZZZ"
+        df.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+        return df
+    }()
+    
+    private let serverFormatterWithMS: DateFormatter = {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"
         return df
     }()
     
@@ -32,53 +39,31 @@ class DateHelper {
     }()
     
     func formatDate(_ dateString: String) -> String {
-        guard let date = serverFormatter.date(from: dateString) else {
-            return ""
+        var date = serverFormatter.date(from: dateString)
+        
+        if date == nil {
+            date = serverFormatterWithMS.date(from: dateString)
         }
+        
+        guard let finalDate = date else { return "" }
+        
         let calendar = Calendar.current
         let now = Date()
-        let components1 = calendar.dateComponents([.year, .month, .day], from: date)
+        let components1 = calendar.dateComponents([.year, .month, .day], from: finalDate)
         let components2 = calendar.dateComponents([.year, .month, .day], from: now)
         
         if components1.year == components2.year && components1.month == components2.month && components1.day == components2.day {
-            return timeFormatter.string(from: date)
+            return timeFormatter.string(from: finalDate)
         } else {
-            return dateFormatter.string(from: date)
+            return dateFormatter.string(from: finalDate)
         }
     }
+
     func formatDateMessage(_ dateString: String) -> String {
-        guard !dateString.isEmpty else { return "" }
-        let trimmedDate = dateString.trimmingCharacters(in: .whitespacesAndNewlines)
-        var finalDateString = trimmedDate
-        if trimmedDate.contains("+") || trimmedDate.contains("-") {
-            let components = trimmedDate.components(separatedBy: ":")
-            if components.count > 1 {
-                let lastComponent = components.last!
-                if lastComponent.count == 2 {
-                    if let lastIndex = finalDateString.lastIndex(of: ":") {
-                        finalDateString.remove(at: lastIndex)
-                    }
-                }
-            }
+        let date = serverFormatter.date(from: dateString) ?? serverFormatterWithMS.date(from: dateString)
+        if let d = date {
+            return timeFormatter.string(from: d)
         }
-
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_US_POSIX")
-        df.dateFormat = "yyyy-MM-dd HH:mm:ssZ"
-        
-        if let date = df.date(from: finalDateString) {
-            return timeFormatter.string(from: date)
-        }
-        
-        let isoDf = DateFormatter()
-        isoDf.locale = Locale(identifier: "en_US_POSIX")
-        isoDf.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        
-        let isoString = finalDateString.replacingOccurrences(of: " ", with: "T")
-        if let date = isoDf.date(from: isoString) {
-            return timeFormatter.string(from: date)
-        }
-
         return "err"
     }
     
