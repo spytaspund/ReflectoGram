@@ -124,21 +124,48 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatCell
         let chat = chats[indexPath.row]
-        
         let formattedDate = DateHelper.shared.formatDate(chat.date ?? "2026-04-30T12:34:30+00:00")
-            
+        let lastMsg = chat.lastMessage
+        var msgText = lastMsg?.text ?? ""
+        let senderName = lastMsg?.sender ?? ""
+
+        if msgText.isEmpty, let type = lastMsg?.type {
+            switch type {
+            case "photo": msgText = "Photo"
+            case "video": msgText = "Video"
+            case "document": msgText = "File"
+            case "sticker": msgText = "Sticker"
+            case "audio": msgText = "Audio"
+            default: msgText = "Message"
+            }
+        }
+
+        let finalPreview = senderName.isEmpty ? msgText : "\(senderName): \(msgText)"
+        cell.messageLabel.text = finalPreview
+        
+        if lastMsg?.type == "photo" || lastMsg?.type == "video", let msg = chat.lastMessage {
+            cell.mediaIconView.isHidden = false
+            cell.mediaIconView.setRemoteImage(url: "\(serverURL)/get_media?session_id=\(sessionID)&chat_id=\(chat.id)&message_id=\(msg.id)&token=\(msg.mediaToken ?? "")&thumb", cacheKey: "thumb_\(chat.lastMessage?.id ?? 0)", placeholder: "message")
+        } else {
+            cell.mediaIconView.isHidden = true
+        }
+        
         cell.titleLabel.text = chat.name
-        cell.messageLabel.text = chat.lastMessage?.text ?? "No messages"
         cell.timeLabel.text = formattedDate
-        
-        let placeholder = (chat.type == "user") ? "reflectogram-person" : "reflectogram-group"
-        let avatarUrl = "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(chat.id)&size=50"
-        
-        cell.avatarImageView.setRemoteImage(
-            url: avatarUrl,
-            cacheKey: "avatar_\(chat.id)",
-            placeholder: placeholder
-        )
+        cell.avatarImageView.setRemoteImage(url: "\(serverURL)/avatar?session_id=\(sessionID)&user_id=\(chat.id)", cacheKey: "avatar_\(chat.id)", placeholder: "reflectogram-person")
+
+        if !senderName.isEmpty && chat.type != "user" && chat.type != "channel" {
+            let fullString = "\(senderName): \(msgText)"
+            let attrStr = NSMutableAttributedString(string: fullString)
+            
+            let range = (fullString as NSString).range(of: "\(senderName):")
+            attrStr.addAttribute(NSAttributedString.Key.font, value: UIFont.boldSystemFont(ofSize: 14), range: range)
+            attrStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.black, range: range)
+            
+            cell.messageLabel.attributedText = attrStr
+        } else {
+            cell.messageLabel.text = msgText
+        }
         
         return cell
     }

@@ -22,6 +22,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
     var serverURL = ""
     var sessionID = ""
     var cryptoKey = ""
+    var isFirstLoad = true
+    var isLoadingOlder = false
+    var canLoadOlder = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +37,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.register(StickerMessageCell.self, forCellReuseIdentifier: "StickerMessageCell")
         tableView.register(FileMessageCell.self, forCellReuseIdentifier: "FileMessageCell")
         tableView.register(AudioMessageCell.self, forCellReuseIdentifier: "AudioMessageCell")
+        tableView.register(SystemMessageCell.self, forCellReuseIdentifier: "SystemMessageCell")
         
         let bgImageView = UIImageView(image: UIImage(named: "reflectogram-background"))
         bgImageView.contentMode = .scaleAspectFill
@@ -46,6 +50,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         messageTextView.layer.cornerRadius = 6
         messageTextView.layer.borderWidth = 1
         messageTextView.layer.borderColor = UIColor.lightGray.cgColor
+        messageTextView.textColor = UIColor.black
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -111,9 +116,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
         self.sessionID = defaults.string(forKey: "sessionId") ?? ""
         self.cryptoKey = defaults.string(forKey: "aesKey") ?? ""
 
-        if serverURL.isEmpty {
-            return
-        } else {
+        if serverURL.isEmpty { return }
+        else if messages.isEmpty {
             setupTitleView(name: activeChat?.name ?? "Chat")
             loadMessages()
         }
@@ -140,11 +144,45 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
                     CacheHelper.shared.saveMessages(loadedMessages, forChatID: "\(chatID)")
                     
                     self.messages = Array(loadedMessages.reversed())
-                    if let tv = self.tableView { tv.reloadData() }
-                    self.scrollToBottom()
+                    self.tableView.reloadData()
+                    if self.isFirstLoad {
+                        self.scrollToBottom()
+                        self.isFirstLoad = false
+                    }
                     
                 case .failure(let error):
                     print("Fetch error: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    func loadOlderMessages() {
+        guard !isLoadingOlder && canLoadOlder else { return }
+        guard let firstMsg = messages.first, let chatID = activeChat?.id else { return }
+        
+        isLoadingOlder = true
+        let url = "\(serverURL)/messages?chat_id=\(chatID)&session_id=\(sessionID)&offsetId=\(firstMsg.id)"
+        
+        APIHelper.shared.fetchMessages(from: url, key: cryptoKey) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoadingOlder = false
+                if case .success(let olderMsgs) = result {
+                    if olderMsgs.isEmpty {
+                        self?.canLoadOlder = false
+                        return
+                    }
+                    
+                    let oldOffset = self?.tableView.contentSize.height ?? 0
+                    let reversedOlder = Array(olderMsgs.reversed())
+                    self?.messages.insert(contentsOf: reversedOlder, at: 0)
+                    
+                    self?.tableView.reloadData()
+                    self?.tableView.layoutIfNeeded()
+                    
+                    let newOffset = self?.tableView.contentSize.height ?? 0
+                    let adjustment = newOffset - oldOffset
+                    self?.tableView.contentOffset = CGPoint(x: 0, y: (self?.tableView.contentOffset.y ?? 0) + adjustment)
                 }
             }
         }
@@ -201,6 +239,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
             } else {
                 bubbleHeight = baseHeight + nameHeight + 10
             }
+            
+        case "system":
+            let capFont = UIFont.boldSystemFont(ofSize: 13)
+            let capHeight = LayoutHelper.sizeForText(text, font: capFont, maxWidth: screenWidth * 0.9 - 20).height
+            return capHeight + 28
+
         default: // text
             let textMaxWidth = maxBubbleWidth - 20 - 45
             let font = UIFont.systemFont(ofSize: 15)
@@ -291,6 +335,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UITableView
             if message.type != "text" {
                 self.didTapMedia(in: cell, message: message)
             }
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row <= 3 && !isLoadingOlder && canLoadOlder {
+            loadOlderMessages()
         }
     }
     

@@ -78,4 +78,34 @@ class DateHelper {
             return String(format: "%d:%02d", mins, secs)
         }
     }
+    
+    func formatSectionDate(_ dateString: String) -> String {
+        let date = serverFormatter.date(from: dateString) ?? serverFormatterWithMS.date(from: dateString)
+        guard let d = date else { return "" }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        let compCheck = calendar.dateComponents([.year, .month, .day], from: d)
+        let compNow = calendar.dateComponents([.year, .month, .day], from: now)
+        
+        if compCheck.year == compNow.year &&
+           compCheck.month == compNow.month &&
+           compCheck.day == compNow.day {
+            return "Today"
+        }
+
+        if let checkMidnight = calendar.date(from: compCheck),
+           let nowMidnight = calendar.date(from: compNow) {
+            let difference = calendar.dateComponents([.day], from: checkMidnight, to: nowMidnight)
+            if difference.day == 1 {
+                return "Yesterday"
+            }
+        }
+        
+        let df = DateFormatter()
+        df.dateStyle = .medium
+        df.timeStyle = .none
+        return df.string(from: d)
+    }
 }

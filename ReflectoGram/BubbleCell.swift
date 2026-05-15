@@ -134,7 +134,7 @@ class ImageMessageCell: BubbleCell {
     override func setupBaseUI() {
         super.setupBaseUI()
         
-        photoView.contentMode = .scaleAspectFill
+        photoView.contentMode = .scaleAspectFit
         photoView.clipsToBounds = true
         photoView.layer.cornerRadius = 8
         photoView.backgroundColor = .lightGray
@@ -432,6 +432,45 @@ class FileMessageCell: BubbleCell {
 
         timeLabel.frame = CGRect(x: bW - 60, y: bH - 16, width: 50, height: 12)
         timeLabel.textColor = isIncoming ? .gray : UIColor(white: 1, alpha: 0.8)
+    }
+}
+
+class SystemMessageCell: BubbleCell {
+    var systemLabel = UILabel()
+    var sysBackground = UIView()
+
+    override func setupBaseUI() {
+        super.setupBaseUI()
+        bubbleView.backgroundColor = .clear
+        
+        sysBackground.backgroundColor = UIColor(white: 0, alpha: 0.2)
+        sysBackground.layer.cornerRadius = 10
+        bubbleView.addSubview(sysBackground)
+        
+        systemLabel.font = UIFont.boldSystemFont(ofSize: 13)
+        systemLabel.textColor = .white
+        systemLabel.textAlignment = .center
+        systemLabel.numberOfLines = 0
+        bubbleView.addSubview(systemLabel)
+        
+        senderNameLabel.isHidden = true
+        timeLabel.isHidden = true
+        avatarImageView.isHidden = true
+    }
+
+    override func layoutSubviews() {
+        let screenWidth = contentView.frame.width
+        let maxBubbleWidth = screenWidth * 0.9
+        let text = systemLabel.text ?? ""
+        let textSize = LayoutHelper.sizeForText(text, font: systemLabel.font, maxWidth: maxBubbleWidth - 20)
+        
+        let finalWidth = textSize.width + 20
+        self.customBubbleWidth = finalWidth
+        super.layoutSubviews()
+        
+        bubbleView.frame = CGRect(x: (screenWidth - finalWidth) / 2, y: 8, width: finalWidth, height: textSize.height + 12)
+        sysBackground.frame = bubbleView.bounds
+        systemLabel.frame = CGRect(x: 10, y: 6, width: textSize.width, height: textSize.height)
     }
 }
 

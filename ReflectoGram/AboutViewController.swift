@@ -221,7 +221,7 @@ class AboutViewController: UITableViewController {
             cell.nameLabel.text = name
             cell.subLabel.text = "\(subsCount) subscribers"
             cell.lastMessageLabel.text = lastPost
-            cell.avatarImageView.setRemoteImage(url: url, cacheKey: "avatar_\(userID)", placeholder: "reflectogram-person")
+            cell.avatarImageView.setRemoteImage(url: url, cacheKey: "avatar_\(channelID)", placeholder: "reflectogram-person")
             return cell
             
         case .phone:

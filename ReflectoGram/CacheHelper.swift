@@ -41,29 +41,29 @@ class CacheHelper {
         }
     }
 
-    private func getPath(for category: CacheCategory, id: String) -> String {
+    private func getPath(for category: CacheCategory, id: String) -> String { // goofy func, might need a rework
         let folder: String
         let fileName: String
         
         switch category {
         case .avatar:
             folder = avatarsPath
-            fileName = "avatar_\(id).png"
+            fileName = "\(id).png"
         case .thumb:
             folder = thumbPath
-            fileName = "thumb_\(id).png"
+            fileName = "\(id).png"
         case .full:
             folder = fullPath
-            fileName = "full_\(id).png"
+            fileName = "\(id).png"
+        case .albumCover:
+            folder = thumbPath
+            fileName = "\(id).png"
         case .messages:
             folder = messagesPath
             fileName = "msg_\(id).json"
         case .about:
             folder = aboutPath
             fileName = "about_\(id).json"
-        case .albumCover:
-            folder = thumbPath
-            fileName = "audio_\(id).png"
         }
         
         return (folder as NSString).appendingPathComponent(fileName)

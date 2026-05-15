@@ -12,6 +12,7 @@ class ChatCell: UITableViewCell {
     let titleLabel = UILabel()
     let messageLabel = UILabel()
     let timeLabel = UILabel()
+    let mediaIconView = UIImageView()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -43,20 +44,56 @@ class ChatCell: UITableViewCell {
         messageLabel.textColor = .gray
         messageLabel.numberOfLines = 2
         contentView.addSubview(messageLabel)
+        
+        mediaIconView.contentMode = .scaleAspectFit
+        mediaIconView.isHidden = true
+        mediaIconView.layer.cornerRadius = 8
+        contentView.addSubview(mediaIconView)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
         let width = contentView.frame.width
+        let height = contentView.frame.height
         
-        avatarImageView.frame = CGRect(x: 10, y: 10, width: 50, height: 50) // x -- padding
-        timeLabel.frame = CGRect(x: width - 90, y: 12, width: 80, height: 20) // x -- - 80 - padding
+        let isSmallScreen = width <= 320
+        let sidePadding: CGFloat = isSmallScreen ? 10 : 20
+        let avatarSize: CGFloat = 50
+        let topPadding: CGFloat = 10
         
-        let titleWidth = width - avatarImageView.frame.maxX - timeLabel.frame.width // padding * 3
-        titleLabel.frame = CGRect(x: avatarImageView.frame.maxX + 10, y: 10, width: titleWidth, height: 22) // x -- avatar... + padding
+        avatarImageView.frame = CGRect(x: sidePadding, y: (height - avatarSize) / 2, width: avatarSize, height: avatarSize)
         
-        let messageWidth = width - avatarImageView.frame.maxX - 20 // padding * 2
-        messageLabel.frame = CGRect(x: avatarImageView.frame.maxX + 10, y: titleLabel.frame.maxY + 2, width: messageWidth, height: 36) // x -- avatar... + padding
+        let titleStartX = avatarImageView.frame.maxX + 12
+        let timeWidth: CGFloat = 70
+        timeLabel.frame = CGRect(x: width - timeWidth - sidePadding, y: topPadding + 2, width: timeWidth, height: 20)
+        
+        let titleWidth = width - titleStartX - timeWidth - sidePadding - 5
+        
+        let msgText = messageLabel.text ?? ""
+        let hasMessage = !msgText.isEmpty
+        
+        if !hasMessage {
+            titleLabel.frame = CGRect(x: titleStartX, y: (height - 22) / 2, width: titleWidth, height: 22)
+            messageLabel.isHidden = true
+            mediaIconView.isHidden = true
+        } else {
+            messageLabel.isHidden = false
+            let textBlockHeight: CGFloat = 22 + 2 + 36
+            let textTopY = (height - textBlockHeight) / 2
+            
+            titleLabel.frame = CGRect(x: titleStartX, y: textTopY, width: titleWidth, height: 22)
+            
+            let iconSize: CGFloat = 16
+            let messageY = titleLabel.frame.maxY + 2
+            let messageAvailableWidth = width - titleStartX - sidePadding - 5
+            
+            if !mediaIconView.isHidden {
+                mediaIconView.frame = CGRect(x: titleStartX, y: messageY + 2, width: iconSize, height: iconSize)
+                messageLabel.frame = CGRect(x: titleStartX + iconSize + 4, y: messageY, width: messageAvailableWidth - iconSize - 4, height: 36)
+            } else {
+                messageLabel.frame = CGRect(x: titleStartX, y: messageY, width: messageAvailableWidth, height: 36)
+            }
+        }
     }
 }
